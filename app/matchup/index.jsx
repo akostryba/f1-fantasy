@@ -1,14 +1,19 @@
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import positionScoring from '@/scoring/positionScoring.json';
+import placeholderProfile from '@/assets/images/profile.avif';
+import DriverContainer from '@/components/driverContainer.jsx';
 
 const MatchupScreen = () => {
 
     const [session, setSession] = useState(null);
     const [positions, setPositions] = useState([]);
-    const [error, setError] = useState(null);
+    const [opponentPositions, setOpponentPositions] = useState([]);
     const [drivers, setDrivers] = useState({});
     const [loadingDrivers, setLoadingDrivers] = useState(true);
+    const [userPoints, setUserPoints] = useState(0);
+    const [opponentPoints, setOpponentPoints] = useState(0);
 
     useEffect(() => {
         fetchSession();
@@ -20,6 +25,14 @@ const MatchupScreen = () => {
             fetchPositions();
         }
     }, [session]);
+
+    useEffect(() => {
+        setUserPoints(updateScore(positions));
+    }, [positions]);
+
+    useEffect(() => {
+        setOpponentPoints(updateScore(opponentPositions));
+    }, [opponentPositions]);
 
     const fetchSession = async () => {
         await fetch('https://api.openf1.org/v1/sessions?session_key=latest')
@@ -47,6 +60,10 @@ const MatchupScreen = () => {
         const verPos = await fetchPosition(session, 1);
         const hamPos = await fetchPosition(session, 44);
         setPositions([verPos, hamPos]);
+
+        const piaPos = await fetchPosition(session, 81);
+        const rusPos = await fetchPosition(session, 63);
+        setOpponentPositions([piaPos, rusPos]);
     }
     
     const fetchDrivers = async () => {
@@ -62,25 +79,52 @@ const MatchupScreen = () => {
         setLoadingDrivers(false);
     }
 
+    const updateScore = (positions) => {
+        let totalPoints = 0;
+        positions.forEach((position) => {
+            const points = Number(positionScoring[position.position]);
+            if (points) {
+                totalPoints += points;
+            }
+        });
+        return totalPoints;
+    }
+
     return (  
         <View style={styles.container}>
             <Text style={styles.headerText}>Matchup Screen</Text>
+            <View style={styles.profilesContainer}>
+                <View style={styles.profileLeft}>
+                    <Image source={placeholderProfile} style={[styles.profilePicture]} />
+                    <Text style={{color: '#fff'}}>User 1</Text>
+                    <Text style={styles.totalPoints}>{userPoints.toFixed(1)}</Text>
+                </View>
+                <View style={styles.profileRight}>
+                    <Image source={placeholderProfile} style={[styles.profilePicture]} />
+                    <Text style={{color: '#fff'}}>User 2</Text>
+                    <Text style={styles.totalPoints}>{opponentPoints.toFixed(1)}</Text>
+                </View>
+            </View>
             { positions.length>0 &&
-            <FlatList 
-                data={positions}
-                keyExtractor={(item) => item.date + item.driver_number}
-                renderItem={({item}) => (
-                    <View style={styles.driverContainer}>
-                        <Image source={{uri: drivers[item.driver_number]?.headshot_url}} style={styles.headshot} />
-                        <View style={styles.details}>
-                            <Text style={styles.driverName}>{drivers[item.driver_number]?.full_name || "error"}</Text>
-                            <Text style={styles.driverPosition}>P{item.position}</Text>
-                        </View>
-                    </View>
-                )}
-            />
+            <View style={styles.listsContainer}>
+                <FlatList 
+                    data={positions}
+                    keyExtractor={(item) => item.date + item.driver_number}
+                    style={styles.leftList}
+                    renderItem={({item}) => (
+                        <DriverContainer drivers={drivers} item={item} />
+                    )}
+                />
+                <FlatList 
+                    data={opponentPositions}
+                    keyExtractor={(item) => item.date + item.driver_number}
+                    style={styles.rightList}
+                    renderItem={({item}) => (
+                        <DriverContainer drivers={drivers} item={item} />
+                    )}
+                />
+            </View>
             }
-            <Text>Error: {error}</Text>
         </View>
     );
 }
@@ -89,38 +133,60 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingVertical: 20,
+        backgroundColor: '#15151e',
     },
     headerText: {
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 20,
+        color: '#fff',
     },
-    headshot: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        borderWidth: 2,
-        borderColor: '#000',
-    },
-    driverContainer: {
+    profilesContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        borderColor: '#fff',
         borderTopWidth: 1,
         borderBottomWidth: 1,
-        borderColor: '#000',
+    },
+    profileLeft: {
+        borderColor: '#fff',
+        borderRightWidth: 1,
+        width: '50%',
+        alignItems: 'center',
         paddingVertical: 10,
     },
-    details: {
-        marginLeft: 10,
+    profileRight: {
+        width: '50%',
+        alignItems: 'center',
+        paddingVertical: 10,
     },
-    driverName: {
-        fontSize: 18,
+    totalPoints: {
+        fontSize: 35,
         fontWeight: 'bold',
+        marginTop: 5,
+        color: '#fff',
     },
-    driverPosition: {
-        fontSize: 16,
+    listsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
     },
+    leftList: {
+        width: '50%',
+        padding: 10
+    },
+    rightList: {
+        width: '50%',
+        padding: 10,
+    },
+    profilePicture: {
+        width: 75,
+        height: 75,
+        borderRadius: 50,
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#FF1801'
+    }
 });
  
 export default MatchupScreen;

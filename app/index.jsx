@@ -31,12 +31,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#15151e",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#343a40",
+    color: "#fff",
     marginBottom: 20,
   },
   button: {
