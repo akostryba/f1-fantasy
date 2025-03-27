@@ -3,9 +3,8 @@ import { StyleSheet } from 'react-native';
 import positionScoring from '@/scoring/positionScoring.json';
 
 const DriverContainer = ({drivers, item}) => {
-    console.log(item, 'hi2')
     return ( 
-        item ? 
+        item && Object.keys(drivers).length>0 &&
         <View style={styles.driverContainer}>
             <View style={[{backgroundColor: '#' + drivers[item.driver_number]?.team_colour}, styles.driverImage]}>
                 <Image source={{uri: drivers[item.driver_number]?.headshot_url}} style={[styles.headshot]} />
@@ -17,8 +16,6 @@ const DriverContainer = ({drivers, item}) => {
                 <Text style={styles.pointLabel}>PTS</Text>
             </View>
         </View>
-        :
-        <Text>Loading</Text>
      );
 }
 

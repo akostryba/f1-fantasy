@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import positionScoring from '@/scoring/positionScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
+import {fetchPosition, fetchSession, fetchDrivers} from '@/api/OpenF1.js';
 
 const MatchupScreen = () => {
 
@@ -12,17 +13,56 @@ const MatchupScreen = () => {
     const [opponentPositions, setOpponentPositions] = useState([]);
     const [drivers, setDrivers] = useState({});
     const [loadingDrivers, setLoadingDrivers] = useState(true);
+    const [loadingSession, setLoadingSession] = useState(true);
+    const [loadingPositions, setLoadingPositions] = useState(true);
     const [userPoints, setUserPoints] = useState(0);
     const [opponentPoints, setOpponentPoints] = useState(0);
 
     useEffect(() => {
-        fetchSession();
-        fetchDrivers();
+        const getSession = async () => {
+            setLoadingSession(true);
+            const session = await fetchSession();
+            setSession(session);
+            setLoadingSession(false);
+        };
+        const getDrivers = async () => {
+            setLoadingDrivers(true);
+            const drivers = await fetchDrivers();
+            setDrivers(drivers);
+            setLoadingDrivers(false);
+        }
+
+        try{
+            getSession();
+            getDrivers();
+        } catch (error) {
+            Alert.alert('Error: ' + error.message);
+            console.error(error);
+        }
     }, []);
 
     useEffect(() => {
+
+        const fetchPositions = async() =>{
+            setLoadingPositions(true);
+            const verPos = await fetchPosition(session, 1);
+            const hamPos = await fetchPosition(session, 44);
+            setPositions([verPos, hamPos]);
+    
+            const piaPos = await fetchPosition(session, 81);
+            const rusPos = await fetchPosition(session, 63);
+            setOpponentPositions([piaPos, rusPos]);
+            setLoadingPositions(false);
+        }
+
         if(session) {
-            fetchPositions();
+            try{
+                fetchPositions();
+            }
+            catch(error){
+                Alert.alert('Error: ' + error.message);
+                console.error(error);
+            }
         }
     }, [session]);
 
@@ -33,51 +73,6 @@ const MatchupScreen = () => {
     useEffect(() => {
         setOpponentPoints(updateScore(opponentPositions));
     }, [opponentPositions]);
-
-    const fetchSession = async () => {
-        await fetch('https://api.openf1.org/v1/sessions?session_key=latest')
-            .then(response => response.json())
-            .then(jsonContent => setSession(jsonContent.at(0).session_key));
-    }
-
-    const fetchPosition = async (session_key, driver_number) => {
-        const response = await fetch('https://api.openf1.org/v1/position?session_key=' + session_key + '&driver_number=' + driver_number);
-        const jsonContent = await response.json();
-
-        const finalPositions = Object.values(
-            jsonContent.reduce((acc, item) => {
-                const driverNumber = item.driver_number;
-                // Always overwrite with the latest position for the driver
-                acc[driverNumber] = item;
-                return acc;
-            }, {})
-        );
-        console.log(finalPositions[0]);
-        return finalPositions[0];
-    }
-
-    const fetchPositions = async() =>{
-        const verPos = await fetchPosition(session, 1);
-        const hamPos = await fetchPosition(session, 44);
-        setPositions([verPos, hamPos]);
-
-        const piaPos = await fetchPosition(session, 81);
-        const rusPos = await fetchPosition(session, 63);
-        setOpponentPositions([piaPos, rusPos]);
-    }
-    
-    const fetchDrivers = async () => {
-        setLoadingDrivers(true);
-        const response = await fetch('https://api.openf1.org/v1/drivers');
-        const jsonContent = await response.json();
-
-        const driversByNumber = jsonContent.reduce((acc, driver) => {
-            acc[driver.driver_number] = driver;
-            return acc;
-        }, {});
-        setDrivers(driversByNumber);
-        setLoadingDrivers(false);
-    }
 
     const updateScore = (positions) => {
         let totalPoints = 0;
@@ -105,25 +100,27 @@ const MatchupScreen = () => {
                     <Text style={styles.totalPoints}>{opponentPoints.toFixed(1)}</Text>
                 </View>
             </View>
-            { positions.length>0 &&
-            <View style={styles.listsContainer}>
-                <FlatList 
-                    data={positions}
-                    keyExtractor={(item) => item.date + item.driver_number}
-                    style={styles.leftList}
-                    renderItem={({item}) => (
-                        <DriverContainer drivers={drivers} item={item} />
-                    )}
-                />
-                <FlatList 
-                    data={opponentPositions}
-                    keyExtractor={(item) => item.date + item.driver_number}
-                    style={styles.rightList}
-                    renderItem={({item}) => (
-                        <DriverContainer drivers={drivers} item={item} />
-                    )}
-                />
-            </View>
+            { loadingDrivers || loadingPositions || loadingSession ?
+                <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
+                :
+                <View style={styles.listsContainer}>
+                    <FlatList 
+                        data={positions}
+                        keyExtractor={(item) => item.date + item.driver_number}
+                        style={styles.leftList}
+                        renderItem={({item}) => (
+                            <DriverContainer drivers={drivers} item={item} />
+                        )}
+                    />
+                    <FlatList 
+                        data={opponentPositions}
+                        keyExtractor={(item) => item.date + item.driver_number}
+                        style={styles.rightList}
+                        renderItem={({item}) => (
+                            <DriverContainer drivers={drivers} item={item} />
+                        )}
+                    />
+                </View>
             }
         </View>
     );
@@ -144,27 +141,25 @@ const styles = StyleSheet.create({
     },
     profilesContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        borderColor: '#fff',
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
+        justifyContent: 'space-around',
     },
     profileLeft: {
-        borderColor: '#fff',
-        borderRightWidth: 1,
-        width: '50%',
+        borderRadius: 10,
+        width: '48%',
         alignItems: 'center',
-        paddingVertical: 10,
+        paddingVertical: 5,
+        backgroundColor: '#323248',
     },
     profileRight: {
-        width: '50%',
+        borderRadius: 10,
+        width: '48%',
         alignItems: 'center',
-        paddingVertical: 10,
+        paddingVertical: 5,
+        backgroundColor: '#323248',
     },
     totalPoints: {
         fontSize: 35,
         fontWeight: 'bold',
-        marginTop: 5,
         color: '#fff',
     },
     listsContainer: {
@@ -180,12 +175,15 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     profilePicture: {
-        width: 75,
-        height: 75,
+        width: 65,
+        height: 65,
         borderRadius: 50,
-        marginBottom: 10,
+        marginBottom: 5,
         borderWidth: 1,
         borderColor: '#FF1801'
+    },
+    loading: {
+        marginTop: 20,
     }
 });
  
