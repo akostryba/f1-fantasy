@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import raceScoring from '@/scoring/raceScoring.json';
@@ -6,20 +6,22 @@ import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
 import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetchPits} from '@/api/OpenF1.js';
+import { useApp } from '@/context/AppContext.jsx';
 
 const TeamScreen = () => {
 
     const [userDrivers, setUserDrivers] = useState([]);
-    const [userDriverNums, setUserDriverNums] = useState([12, 44]);
     const [meeting, setMeeting] = useState(null);
     const [raceSession, setRaceSession] = useState(null);
     const [qualiSession, setQualiSession] = useState(null);
-    const [drivers, setDrivers] = useState({});
+    const { drivers, setDrivers, userDriverNums } = useApp();
     const [loadingDrivers, setLoadingDrivers] = useState(true);
     const [loadingSession, setLoadingSession] = useState(true);
     const [loadingPositions, setLoadingPositions] = useState(true);
     const [userPoints, setUserPoints] = useState(0);
     const [reloadTrigger, setReloadTrigger] = useState(0); 
+
+    const router = useRouter();
 
     useEffect(() => {
         const fetchMeetingData = async () => {
@@ -39,7 +41,7 @@ const TeamScreen = () => {
     }, [reloadTrigger]);
 
     useEffect(() => {
-        if (Object.keys(drivers).length>0 || !meeting) {
+        if (userDrivers[0]?.info || !meeting) {
             return;
         }
         const getDrivers = async () => {
@@ -177,8 +179,14 @@ const TeamScreen = () => {
 
     return (  
         <View style={styles.container}>
-            <Text style={styles.navText}>Team</Text>
-            <Text style={styles.navText}>Drivers</Text>
+            <View style={styles.navBar}>
+                <Text style={styles.navText}>Home</Text>
+                <Text style={[styles.navText, styles.underlined]}>Team</Text>
+                <TouchableOpacity onPress={() => router.replace({pathname: '/drivers', params: {drivers: JSON.stringify(drivers)}}, { animation: 'none' })}>
+                    <Text style={styles.navText}>Drivers</Text>
+                </TouchableOpacity>
+                <Text style={styles.navText}>League</Text>
+            </View>
             <View style={styles.profilesContainer}>
                 <View style={styles.profileLeft}>
                     <Image source={placeholderProfile} style={[styles.profilePicture]} />
@@ -186,7 +194,7 @@ const TeamScreen = () => {
                     <Text style={styles.totalPoints}>{userPoints.toFixed(1)}</Text>
                 </View>
             </View>
-            { loadingDrivers || !userDrivers[0].info ?
+            {  !userDrivers.length>0 ?
                 <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
                 :
                 <View style={styles.listsContainer}>
@@ -207,15 +215,25 @@ const TeamScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingVertical: 20,
+        paddingVertical: 10,
         backgroundColor: '#15151e',
     },
+    navBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+    },
     navText: {
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginBottom: 20,
-        color: '#fff',
+        color: 'lightgrey',
+    },
+    underlined: {
+        borderBottomWidth: 2,
+        borderBottomColor: '#FF1801',
+        paddingBottom: 5,
     },
     profilesContainer: {
         flexDirection: 'row',
