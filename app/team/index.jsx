@@ -5,11 +5,12 @@ import raceScoring from '@/scoring/raceScoring.json';
 import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
-import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting} from '@/api/OpenF1.js';
+import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetchPits} from '@/api/OpenF1.js';
 
 const TeamScreen = () => {
 
     const [userDrivers, setUserDrivers] = useState([]);
+    const [userDriverNums, setUserDriverNums] = useState([12, 44]);
     const [meeting, setMeeting] = useState(null);
     const [raceSession, setRaceSession] = useState(null);
     const [qualiSession, setQualiSession] = useState(null);
@@ -46,7 +47,7 @@ const TeamScreen = () => {
             try{
                 const fetchedDrivers=  await fetchDrivers(meeting);
                 setDrivers(fetchedDrivers);
-                setUserDrivers([{"info": fetchedDrivers[1]}, {"info":fetchedDrivers[44]}]);
+                setUserDrivers([{"info": fetchedDrivers[userDriverNums[0]]}, {"info":fetchedDrivers[userDriverNums[1]]}]);
             } catch (error) {
                 Alert.alert('Error',error.message,[
                     { text: 'Cancel', style: 'cancel' },
@@ -94,27 +95,32 @@ const TeamScreen = () => {
 
             setLoadingPositions(true);
             try {
-                const [verPos, hamPos, verQualiPos, hamQualiPos] = await Promise.all([
-                    fetchPosition(raceSession, 1),
-                    fetchPosition(raceSession, 44),
-                    fetchPosition(qualiSession, 1),
-                    fetchPosition(qualiSession, 44)
+                const [dr1Pos, dr2Pos, dr1QualiPos, dr2QualiPos] = await Promise.all([
+                    fetchPosition(raceSession, userDriverNums[0]),
+                    fetchPosition(raceSession, userDriverNums[1]),
+                    fetchPosition(qualiSession, userDriverNums[0]),
+                    fetchPosition(qualiSession, userDriverNums[1])
+                ]);
+
+                const [dr1Pits, dr2Pits] = await Promise.all([
+                    fetchPits(raceSession, userDriverNums[0]),
+                    fetchPits(raceSession, userDriverNums[1]),
                 ]);
 
                 setUserDrivers(prev => {
                     const newDrivers = [
-                        { ...prev[0], racePosition: verPos, qualiPosition: verQualiPos },
-                        { ...prev[1], racePosition: hamPos, qualiPosition: hamQualiPos }
+                        { ...prev[0], racePosition: dr1Pos, qualiPosition: dr1QualiPos, pits: dr1Pits },
+                        { ...prev[1], racePosition: dr2Pos, qualiPosition: dr2QualiPos, pits: dr2Pits }
                     ];
                     
-                    const driverOnePoints = calculateScore(newDrivers[0]);
-                    const driverTwoPoints = calculateScore(newDrivers[1]);
+                    const driverOnePoints = calculateScore(newDrivers[0]) + calculatePitScore(dr1Pits);;
+                    const driverTwoPoints = calculateScore(newDrivers[1]) + calculatePitScore(dr2Pits);;
                     
                     setUserPoints(driverOnePoints + driverTwoPoints);
                     
                     return [
-                        { ...newDrivers[0], score: driverOnePoints },
-                        { ...newDrivers[1], score: driverTwoPoints }
+                        { ...newDrivers[0], score: driverOnePoints},
+                        { ...newDrivers[1], score: driverTwoPoints}
                     ];
                 });
             } catch (error) {
@@ -136,11 +142,29 @@ const TeamScreen = () => {
 
         const quali = driver.qualiPosition;
         const race = driver.racePosition;
-
         let totalPoints = 0;
         totalPoints += Number(qualiScoring[quali.position]);
         totalPoints += Number(raceScoring[race.position]);
         return totalPoints;
+    }
+
+    const calculatePitScore = (data) => {
+        let total = 0;
+        for (let i = 0; i < data.length; i++) {
+            const pitStop = data[i].pit_duration/10;
+            if (pitStop >= 3) {
+                continue;
+            } else if (pitStop >=2.5) {
+                total += 2;
+            } else if (pitStop >= 2.2) {
+                total+= 5;
+            } else if (pitStop >= 2) {
+                total+= 10;
+            } else if (pitStop > 0.1) {
+                total+= 20;
+            }
+        }
+        return total;
     }
 
     const handleReload = () => {
@@ -150,12 +174,11 @@ const TeamScreen = () => {
         setLoadingPositions(true);
     }
 
-    // console.log(loadingDrivers, loadingPositions, loadingSession);
-    // console.log(userDrivers);
 
     return (  
         <View style={styles.container}>
-            <Text style={styles.headerText}>Team</Text>
+            <Text style={styles.navText}>Team</Text>
+            <Text style={styles.navText}>Drivers</Text>
             <View style={styles.profilesContainer}>
                 <View style={styles.profileLeft}>
                     <Image source={placeholderProfile} style={[styles.profilePicture]} />
@@ -163,13 +186,13 @@ const TeamScreen = () => {
                     <Text style={styles.totalPoints}>{userPoints.toFixed(1)}</Text>
                 </View>
             </View>
-            { loadingDrivers || loadingPositions || loadingSession || !userDrivers[0].racePosition || !userDrivers[0].info ?
+            { loadingDrivers || !userDrivers[0].info ?
                 <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
                 :
                 <View style={styles.listsContainer}>
                     <FlatList 
                         data={userDrivers}
-                        keyExtractor={(item) => item.racePosition.date + item.info.driver_number}
+                        keyExtractor={(item) => item.info.driver_number}
                         style={styles.leftList}
                         renderItem={({item}) => (
                             <DriverContainer item={item} />
@@ -187,7 +210,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         backgroundColor: '#15151e',
     },
-    headerText: {
+    navText: {
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',

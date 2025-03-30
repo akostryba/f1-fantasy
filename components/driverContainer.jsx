@@ -1,4 +1,4 @@
-import {View, Image, Text} from 'react-native';
+import {View, Image, Text, ActivityIndicator} from 'react-native';
 import { StyleSheet } from 'react-native';
 import raceScoring from '@/scoring/raceScoring.json';
 
@@ -12,8 +12,14 @@ const DriverContainer = ({item}) => {
             <View style={styles.details}>
                 <Text style={styles.driverName}>{item.info.broadcast_name || "error"}</Text>
                 <Text style={styles.driverDetails}>#{item.info.driver_number} | {item.info.team_name}</Text>
-                <Text style={styles.driverPoints}>{item.score}</Text>
-                <Text style={styles.pointLabel}>PTS</Text>
+                {!item.racePosition ? 
+                    <ActivityIndicator style={styles.loading} size='small' color='#fff'/>
+                    :
+                    <>
+                    <Text style={styles.driverPoints}>{Number(item.score).toFixed(1)}</Text>
+                    <Text style={styles.pointLabel}>PTS</Text>
+                    </>
+                }
             </View>
         </View>
      );
@@ -69,6 +75,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 10,
     },
+    loading: {
+        marginVertical: 10,
+    }
 });
  
 export default DriverContainer;
