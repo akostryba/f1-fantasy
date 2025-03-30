@@ -15,7 +15,7 @@ const HomeScreen = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/matchup')}
+        onPress={() => router.push('/team')}
       >
         <Text style={styles.buttonText}>Start</Text>
 

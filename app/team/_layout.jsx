@@ -1,6 +1,6 @@
 import {Stack} from "expo-router";
 
-const MatchupLayout = () => {
+const TeamLayout = () => {
     return ( 
         <Stack
             screenOptions={{
@@ -10,4 +10,4 @@ const MatchupLayout = () => {
      );
 }
  
-export default MatchupLayout;
+export default TeamLayout;

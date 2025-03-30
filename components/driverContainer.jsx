@@ -1,18 +1,18 @@
 import {View, Image, Text} from 'react-native';
 import { StyleSheet } from 'react-native';
-import positionScoring from '@/scoring/positionScoring.json';
+import raceScoring from '@/scoring/raceScoring.json';
 
-const DriverContainer = ({drivers, item}) => {
+const DriverContainer = ({item}) => {
     return ( 
-        item && Object.keys(drivers).length>0 &&
+        item  &&
         <View style={styles.driverContainer}>
-            <View style={[{backgroundColor: '#' + drivers[item.driver_number]?.team_colour}, styles.driverImage]}>
-                <Image source={{uri: drivers[item.driver_number]?.headshot_url}} style={[styles.headshot]} />
+            <View style={[{backgroundColor: '#' + item.info.team_colour}, styles.driverImage]}>
+                <Image source={{uri: item.info.headshot_url}} style={[styles.headshot]} />
             </View>
             <View style={styles.details}>
-                <Text style={styles.driverName}>{drivers[item.driver_number]?.broadcast_name || "error"}</Text>
-                <Text style={styles.driverDetails}>#{drivers[item.driver_number]?.driver_number} | {drivers[item.driver_number]?.team_name}</Text>
-                <Text style={styles.driverPoints}>{Number(positionScoring[item.position]).toFixed(1)}</Text>
+                <Text style={styles.driverName}>{item.info.broadcast_name || "error"}</Text>
+                <Text style={styles.driverDetails}>#{item.info.driver_number} | {item.info.team_name}</Text>
+                <Text style={styles.driverPoints}>{item.score}</Text>
                 <Text style={styles.pointLabel}>PTS</Text>
             </View>
         </View>
