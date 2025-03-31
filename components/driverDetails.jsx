@@ -1,22 +1,21 @@
 import {View, Text, StyleSheet, TouchableOpacity, Image, FlatList} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import qualiScoring from '@/scoring/qualiScoring.json';
+import raceScoring from '@/scoring/raceScoring.json';
+import {singlePitScore} from '@/utils/singlePitScore';
+
+
+const ScoreDetail = ({selectedDriver, scoringFormat}) => {
+    return ( 
+        <View style={modalStyles.qualiDetail}>
+            <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
+            <Text style={modalStyles.posText}>P{selectedDriver.qualiPosition.position}</Text>
+            <Text style={modalStyles.pointText}>{scoringFormat[selectedDriver.qualiPosition.position]} PTS</Text>
+        </View>
+     );
+};
 
 const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
-
-    const singlePitScore = (pitStop) => {
-        pitStop = pitStop/10;
-        if (pitStop >= 3) {
-            return 0;
-        } else if (pitStop >=2.5) {
-            return 2;
-        } else if (pitStop >= 2.2) {
-            return 5;
-        } else if (pitStop >= 2) {
-            return 10;
-        } else if (pitStop > 0.1) {
-            return 20;
-        }
-    }
 
     return ( 
         <View style={modalStyles.modalContainer}>
@@ -39,19 +38,10 @@ const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
                     </View>
                     <View style={modalStyles.mainSection}>
                         <Text style={modalStyles.header}>Qualifying</Text>
-                        <View style={modalStyles.qualiDetail}>
-                            <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
-                            <Text style={modalStyles.posText}>P{selectedDriver.qualiPosition.position}</Text>
-                            <Text style={modalStyles.pointText}>20 PTS</Text>
-                        </View>
-
+                        <ScoreDetail selectedDriver={selectedDriver} scoringFormat={qualiScoring} />
 
                         <Text style={modalStyles.header}>Race</Text>
-                        <View style={modalStyles.qualiDetail}>
-                            <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
-                            <Text style={modalStyles.posText}>P{selectedDriver.racePosition.position}</Text>
-                            <Text style={modalStyles.pointText}>20 PTS</Text>
-                        </View>
+                        <ScoreDetail selectedDriver={selectedDriver} scoringFormat={raceScoring} />
                         <Text style={modalStyles.header}>Pit Stops</Text>
                             <FlatList 
                                 data={selectedDriver.pits}
@@ -60,7 +50,7 @@ const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
                                     <View style={modalStyles.qualiDetail}>
                                         <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
                                         <View styles={modalStyles.pitDetails}>
-                                            <Text style={modalStyles.posText}>{Number(item.pit_duration/10).toFixed(2)}</Text>
+                                            <Text style={modalStyles.posText}>{Number(item.pit_duration/10).toFixed(2)}s</Text>
                                             <Text style={modalStyles.lapText}>Lap {item.lap_number}</Text>
                                         </View>
                                         <Text style={modalStyles.pointText}>{singlePitScore(item.pit_duration)} PTS</Text>
