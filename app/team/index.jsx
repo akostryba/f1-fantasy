@@ -8,6 +8,7 @@ import DriverContainer from '@/components/driverContainer.jsx';
 import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetchPits} from '@/api/OpenF1.js';
 import { useApp } from '@/context/AppContext.jsx';
 import DriverDetails from '@/components/driverDetails.jsx';
+import {calculatePitScore } from '@/utils/calculatePitScore';
 
 const TeamScreen = () => {
 
@@ -155,25 +156,6 @@ const TeamScreen = () => {
         totalPoints += Number(qualiScoring[quali.position]);
         totalPoints += Number(raceScoring[race.position]);
         return totalPoints;
-    }
-
-    const calculatePitScore = (data) => {
-        let total = 0;
-        for (let i = 0; i < data.length; i++) {
-            const pitStop = data[i].pit_duration/10;
-            if (pitStop >= 3) {
-                continue;
-            } else if (pitStop >=2.5) {
-                total += 2;
-            } else if (pitStop >= 2.2) {
-                total+= 5;
-            } else if (pitStop >= 2) {
-                total+= 10;
-            } else if (pitStop > 0.1) {
-                total+= 20;
-            }
-        }
-        return total;
     }
 
     const handleReload = () => {

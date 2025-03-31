@@ -1,7 +1,23 @@
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Image, FlatList} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
+
+    const singlePitScore = (pitStop) => {
+        pitStop = pitStop/10;
+        if (pitStop >= 3) {
+            return 0;
+        } else if (pitStop >=2.5) {
+            return 2;
+        } else if (pitStop >= 2.2) {
+            return 5;
+        } else if (pitStop >= 2) {
+            return 10;
+        } else if (pitStop > 0.1) {
+            return 20;
+        }
+    }
+
     return ( 
         <View style={modalStyles.modalContainer}>
             { selectedDriver &&
@@ -22,7 +38,35 @@ const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
                         </View>
                     </View>
                     <View style={modalStyles.mainSection}>
-                        <Text style={modalStyles.modalText}>Test</Text>
+                        <Text style={modalStyles.header}>Qualifying</Text>
+                        <View style={modalStyles.qualiDetail}>
+                            <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
+                            <Text style={modalStyles.posText}>P{selectedDriver.qualiPosition.position}</Text>
+                            <Text style={modalStyles.pointText}>20 PTS</Text>
+                        </View>
+
+
+                        <Text style={modalStyles.header}>Race</Text>
+                        <View style={modalStyles.qualiDetail}>
+                            <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
+                            <Text style={modalStyles.posText}>P{selectedDriver.racePosition.position}</Text>
+                            <Text style={modalStyles.pointText}>20 PTS</Text>
+                        </View>
+                        <Text style={modalStyles.header}>Pit Stops</Text>
+                            <FlatList 
+                                data={selectedDriver.pits}
+                                keyExtractor={(item) => item.driver_number + item.lap_number}
+                                renderItem={({item}) => (
+                                    <View style={modalStyles.qualiDetail}>
+                                        <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
+                                        <View styles={modalStyles.pitDetails}>
+                                            <Text style={modalStyles.posText}>{Number(item.pit_duration/10).toFixed(2)}</Text>
+                                            <Text style={modalStyles.lapText}>Lap {item.lap_number}</Text>
+                                        </View>
+                                        <Text style={modalStyles.pointText}>{singlePitScore(item.pit_duration)} PTS</Text>
+                                    </View>
+                                )}
+                            />
                     </View>
                 </View>
             }
@@ -61,9 +105,24 @@ const modalStyles = StyleSheet.create({
         alignItems: 'flex-end',
         height: '100%',
     },
-    modalText: {
-      color: '#fff',
-      fontSize: 20,
+    pointText: {
+      color: 'lightgrey',
+      fontSize: 35,
+      marginLeft: 'auto',
+      marginRight: 5
+    },
+    posText: {
+        marginLeft: 10,
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 35,
+    },
+    lapText: {
+        marginLeft: 10,
+        color: 'lightgrey',
+        fontWeight: 'bold',
+        fontSize: 12,
+        lineHeight: 12,
     },
     headshot: {
         width: 100,
@@ -91,6 +150,33 @@ const modalStyles = StyleSheet.create({
         fontSize: '12',
         lineHeight: '12',
         marginBottom: 5,
+    },
+    mainSection: {
+        flexDirection: 'col',
+        marginHorizontal: '10',
+        marginTop: '10',
+    },
+    header:{
+        color: "lightgrey",
+        fontWeight: 'bold',
+        marginBottom: '10',
+    },
+    qualiDetail: {
+        backgroundColor: '#323248',
+        borderRadius: 10,
+        padding: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    smallHeadshot:{
+        marginHorizontal: 5,
+        height: 50,
+        width: 50,
+        borderWidth: 1,
+        borderColor: '#FF1801',
+        borderRadius: 40,
+        backgroundColor: '#fff'
     },
 });
 
