@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import raceScoring from '@/scoring/raceScoring.json';
 import { Ionicons } from '@expo/vector-icons';
 
-const DriverContainerStatic = ({item}) => {
+const DriverContainerStatic = ({item, displayArrow}) => {
     return ( 
         item  &&
         <View style={styles.driverContainer}>
@@ -15,9 +15,9 @@ const DriverContainerStatic = ({item}) => {
                 <Text style={styles.driverLastName}>{item.last_name.toUpperCase() || "error"}</Text>
                 <Text style={styles.driverDetails}>#{item.driver_number} | {item.team_name}</Text>
             </View>
-            <View style={styles.iconContainer}>
+            {displayArrow && <View style={styles.iconContainer}>
                 <Ionicons name="chevron-forward" size={24} color="#fff" />
-            </View>
+            </View>}
         </View>
      );
 }
@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     headshot: {
         width: 95,
         height: 95,
+        
     },
     driverContainer: {
         flexDirection: 'row',
@@ -33,7 +34,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderColor: '#fff',
         width: '100%',
-        marginBottom: 10,
         overflow: 'hidden',
     },
     driverImage: {
@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderRightWidth: 1, 
         borderColor: '#fff',
+        overflow: 'hidden',
     },
     details: {
         paddingTop: 2,
@@ -58,6 +59,7 @@ const styles = StyleSheet.create({
         fontSize: 35,
         fontWeight: 'bold',
         color: '#fff',
+        marginRight: 5,
     },
     driverPoints: {
         marginTop: 5,

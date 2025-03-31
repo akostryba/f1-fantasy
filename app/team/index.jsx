@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import raceScoring from '@/scoring/raceScoring.json';
 import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
 import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetchPits} from '@/api/OpenF1.js';
 import { useApp } from '@/context/AppContext.jsx';
+import DriverDetails from '@/components/driverDetails.jsx';
 
 const TeamScreen = () => {
 
@@ -22,6 +23,12 @@ const TeamScreen = () => {
     const [reloadTrigger, setReloadTrigger] = useState(0); 
 
     const router = useRouter();
+
+    const [selectedDriver, setSelectedDriver] = useState(null);
+
+    const handleDriverSelect = (driver) => {
+        setSelectedDriver(driver);
+    }
 
     useEffect(() => {
         const fetchMeetingData = async () => {
@@ -203,14 +210,35 @@ const TeamScreen = () => {
                         keyExtractor={(item) => item.info.driver_number}
                         style={styles.leftList}
                         renderItem={({item}) => (
-                            <DriverContainer item={item} />
+                            <TouchableOpacity onPress ={() => handleDriverSelect(item)}>
+                                <DriverContainer item={item} />
+                            </TouchableOpacity>
                         )}
                     />
                 </View>
             }
+
+        <Modal
+            visible={!!selectedDriver}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setSelectedDriver(null)}
+        >
+            <TouchableOpacity style={modalStyles.backdrop} activeOpacity={1} onPress={() => setSelectedDriver(null)}>
+                <DriverDetails selectedDriver={selectedDriver} setSelectedDriver={setSelectedDriver}/>
+            </TouchableOpacity>
+        </Modal>
+
         </View>
     );
 }
+
+const modalStyles = StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+});
 
 const styles = StyleSheet.create({
     container: {

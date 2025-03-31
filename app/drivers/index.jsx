@@ -2,14 +2,30 @@ import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useApp } from '@/context/AppContext.jsx';
 import DriverContainerStatic from '@/components/driverContainerStatic.jsx';
+import Popover from 'react-native-popover-view';
+import {Dimensions} from 'react-native';
 
 const DriversScreen = () => {
 
     const router = useRouter();
-    const { drivers, userDriverNums } = useApp();
+    const { drivers, userDriverNums, setUserDriverNums } = useApp();
     const filteredDrivers = {...drivers};
     delete filteredDrivers[userDriverNums[0]];
     delete filteredDrivers[userDriverNums[1]];
+    const userDriver1 = drivers[userDriverNums[0]];
+    const userDriver2 = drivers[userDriverNums[1]];
+
+    const deviceWidth = Dimensions.get('window').width;
+
+    const swapDriver = (currentDriverIndex, newDriverNum) => {
+        setUserDriverNums((prevDriverNums) => {
+            const newDriverNums = [...prevDriverNums];
+            newDriverNums[currentDriverIndex] = newDriverNum;
+            return newDriverNums;
+        });
+        router.replace('/drivers', { animation: 'none' });
+    }
+    
 
     return (
         <View style={styles.container}>
@@ -27,7 +43,27 @@ const DriversScreen = () => {
                         keyExtractor={(item) => item.driver_number}
                         style={styles.leftList}
                         renderItem={({item}) => (
-                            <DriverContainerStatic item={item} />
+                            <Popover
+                                popoverStyle={{width: deviceWidth - 20}}
+                                from={(
+                                <TouchableOpacity style={styles.driverOption}>
+                                    <DriverContainerStatic item={item} displayArrow={true}/>
+                                </TouchableOpacity>
+                                )}>
+                                <View style={styles.popoverView}>
+                                    <Text style={styles.popoverLabel}>Swap Driver:</Text>
+                                    <View style={styles.selectedDriver}>
+                                        <DriverContainerStatic item={item}/>
+                                    </View>
+                                    <Text style={styles.popoverLabel}>For...</Text>
+                                    <TouchableOpacity style={styles.driverOption} onPress={() => {swapDriver(0, item.driver_number)}}>
+                                        <DriverContainerStatic item={userDriver1}/>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.driverOption} onPress={() => {swapDriver(1, item.driver_number)}}>
+                                        <DriverContainerStatic item={userDriver2}/>
+                                    </TouchableOpacity>
+                                </View>
+                            </Popover>
                         )}
                     />
         </View>
@@ -63,6 +99,29 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginVertical: 5,
         paddingLeft: 5,
+    },
+    popoverView:{
+        width: '100%',
+        backgroundColor: '#15151e',
+        padding: 10,
+        borderWidth: 1,
+        borderColor: '#fff',
+        color: '#fff',
+        borderRadius: 10,
+    },
+    popoverLabel: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+        padding: 10,
+    },
+    selectedDriver: {
+        marginBottom: 15,
+        backgroundColor: '#323248',
+        height: 'auto',
+    },
+    driverOption: {
+        marginBottom: 10,
     }
 });
  

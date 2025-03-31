@@ -7,7 +7,7 @@ export const AppProvider = ({ children }) => {
   const [userDriverNums, setUserDriverNums] = useState([1, 4]);
 
   return (
-    <AppContext.Provider value={{ drivers, setDrivers, userDriverNums}}>
+    <AppContext.Provider value={{ drivers, setDrivers, userDriverNums, setUserDriverNums}}>
       {children}
     </AppContext.Provider>
   );
