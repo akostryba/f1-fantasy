@@ -5,7 +5,7 @@ import raceScoring from '@/scoring/raceScoring.json';
 import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
-import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetch2025Meetings, fetchPits} from '@/api/OpenF1.js';
+import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetch2025Meetings, fetchPits, fetchAllPits} from '@/api/OpenF1.js';
 import { useApp } from '@/context/AppContext.jsx';
 import DriverDetails from '@/components/driverDetails.jsx';
 import {calculatePitScore } from '@/utils/calculatePitScore';
@@ -25,6 +25,7 @@ const TeamScreen = () => {
     const [userPoints, setUserPoints] = useState(0);
     const [reloadTrigger, setReloadTrigger] = useState(0); 
     const [meetingIndex, setMeetingIndex] = useState(0);
+    const [pitStops, setPitStops] = useState([]);
 
     const router = useRouter();
 
@@ -93,6 +94,10 @@ const TeamScreen = () => {
                     fetchSession('Race', meeting),
                     fetchSession('Qualifying', meeting)
                 ]);
+                const pitStops = await fetchAllPits(race);
+                const sortedByPitDuration = pitStops.sort((a, b) => a.pit_duration - b.pit_duration);
+                console.log(sortedByPitDuration);
+                setPitStops(sortedByPitDuration);
                 setRaceSession(race);
                 setQualiSession(quali);
             } catch (error) {
@@ -112,7 +117,7 @@ const TeamScreen = () => {
 
     useEffect(() => {
         const fetchAndCalculatePositions = async () => {
-            if (!raceSession || !qualiSession) return;
+            if (!raceSession || !qualiSession || !pitStops) return;
 
             setLoadingPositions(true);
             try {
@@ -123,16 +128,31 @@ const TeamScreen = () => {
                     fetchPosition(qualiSession, userDriverNums[1])
                 ]);
 
-                const [dr1Pits, dr2Pits] = await Promise.all([
-                    fetchPits(raceSession, userDriverNums[0]),
-                    fetchPits(raceSession, userDriverNums[1]),
-                ]);
+                // const [dr1Pits, dr2Pits] = await Promise.all([
+                //     fetchPits(raceSession, userDriverNums[0]),
+                //     fetchPits(raceSession, userDriverNums[1]),
+                // ]);
+
+                const dr1Pits = pitStops.reduce((indices, pit, index) => {
+                    if (pit.driver_number === userDriverNums[0]) {
+                        indices.push(index);
+                    }
+                    return indices;
+                }, []);
+
+                const dr2Pits = pitStops.reduce((indices, pit, index) => {
+                    if (pit.driver_number === userDriverNums[1]) {
+                        indices.push(index);
+                    }
+                    return indices;
+                }, []);
 
                 setUserDrivers(prev => {
                     const newDrivers = [
                         { ...prev[0], racePosition: dr1Pos, qualiPosition: dr1QualiPos, pits: dr1Pits },
                         { ...prev[1], racePosition: dr2Pos, qualiPosition: dr2QualiPos, pits: dr2Pits }
                     ];
+                    console.log(calculatePitScore(dr1Pits), calculatePitScore(dr2Pits));
                     
                     const driverOnePoints = calculateScore(newDrivers[0]) + calculatePitScore(dr1Pits);;
                     const driverTwoPoints = calculateScore(newDrivers[1]) + calculatePitScore(dr2Pits);;
@@ -157,7 +177,7 @@ const TeamScreen = () => {
         };
 
         fetchAndCalculatePositions();
-    }, [raceSession, qualiSession]);
+    }, [raceSession, qualiSession, pitStops]);
 
     const calculateScore = (driver) => {
 
@@ -222,7 +242,7 @@ const TeamScreen = () => {
             onRequestClose={() => setSelectedDriver(null)}
         >
             <TouchableOpacity style={modalStyles.backdrop} activeOpacity={1} onPress={() => setSelectedDriver(null)}>
-                <DriverDetails selectedDriver={selectedDriver} setSelectedDriver={setSelectedDriver}/>
+                <DriverDetails selectedDriver={selectedDriver} setSelectedDriver={setSelectedDriver} pitStops={pitStops}/>
             </TouchableOpacity>
         </Modal>
 
@@ -308,7 +328,6 @@ const styles = StyleSheet.create({
     },
     driversLabel: {
         fontSize: 14,
-        // fontWeight: 'bold',
         color: '#fff',
         marginLeft: 10,
     }

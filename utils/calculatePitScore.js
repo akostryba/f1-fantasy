@@ -1,10 +1,9 @@
 import {singlePitScore} from './singlePitScore';
 
-export const calculatePitScore = (data) => {
+export const calculatePitScore = (indices) => {
     let total = 0;
-    for (let i = 0; i < data.length; i++) {
-        const pitStop = data[i].pit_duration;
-        total += singlePitScore(pitStop);
+    for (let i = 0; i < indices.length; i++) {
+        total += singlePitScore(indices[i]);
     }
     return total;
 }

@@ -64,3 +64,14 @@ export const fetchPits = async (session_key, driver_number) => {
 
     return jsonContent;
 }
+
+export const fetchAllPits = async (session_key) => {
+    console.log("fetching all pits:" + session_key);
+    const response = await fetch('https://api.openf1.org/v1/pit?session_key=' + session_key);
+    if(!response.ok){
+        throw new Error('Failed to fetch pit data');
+    }
+    const jsonContent = await response.json();
+
+    return jsonContent;
+}

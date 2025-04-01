@@ -15,7 +15,7 @@ const ScoreDetail = ({selectedDriver, scoringFormat}) => {
      );
 };
 
-const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
+const DriverDetails = ({selectedDriver, setSelectedDriver, pitStops}) => {
 
     return ( 
         <View style={modalStyles.modalContainer}>
@@ -50,10 +50,10 @@ const DriverDetails = ({selectedDriver, setSelectedDriver}) => {
                                     <View style={modalStyles.qualiDetail}>
                                         <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
                                         <View styles={modalStyles.pitDetails}>
-                                            <Text style={modalStyles.posText}>{Number(item.pit_duration/10).toFixed(2)}s</Text>
-                                            <Text style={modalStyles.lapText}>Lap {item.lap_number}</Text>
+                                            <Text style={modalStyles.posText}>{Number(pitStops[item].pit_duration).toFixed(1)}s</Text>
+                                            <Text style={modalStyles.lapText}>#{item+1}</Text>
                                         </View>
-                                        <Text style={modalStyles.pointText}>{singlePitScore(item.pit_duration)} PTS</Text>
+                                        <Text style={modalStyles.pointText}>{singlePitScore(item)} PTS</Text>
                                     </View>
                                 )}
                             />
