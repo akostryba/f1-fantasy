@@ -23,7 +23,7 @@ const DriversScreen = () => {
             newDriverNums[currentDriverIndex] = newDriverNum;
             return newDriverNums;
         });
-        router.replace('/drivers', { animation: 'none' });
+        router.replace('/team', { animation: 'none' });
     }
     
 

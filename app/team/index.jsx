@@ -5,15 +5,17 @@ import raceScoring from '@/scoring/raceScoring.json';
 import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
-import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetchPits} from '@/api/OpenF1.js';
+import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetch2025Meetings, fetchPits} from '@/api/OpenF1.js';
 import { useApp } from '@/context/AppContext.jsx';
 import DriverDetails from '@/components/driverDetails.jsx';
 import {calculatePitScore } from '@/utils/calculatePitScore';
+import MeetingCarousel from '@/components/meetingCarousel.jsx';
 
 const TeamScreen = () => {
 
     const [userDrivers, setUserDrivers] = useState([]);
     const [meeting, setMeeting] = useState(null);
+    const [meetings, setMettings] = useState([]);
     const [raceSession, setRaceSession] = useState(null);
     const [qualiSession, setQualiSession] = useState(null);
     const { drivers, setDrivers, userDriverNums } = useApp();
@@ -22,6 +24,7 @@ const TeamScreen = () => {
     const [loadingPositions, setLoadingPositions] = useState(true);
     const [userPoints, setUserPoints] = useState(0);
     const [reloadTrigger, setReloadTrigger] = useState(0); 
+    const [meetingIndex, setMeetingIndex] = useState(0);
 
     const router = useRouter();
 
@@ -34,8 +37,10 @@ const TeamScreen = () => {
     useEffect(() => {
         const fetchMeetingData = async () => {
             try{
-                const meetingData = await fetchMeeting();
-                setMeeting(meetingData);
+                const meetings = await fetch2025Meetings();
+                setMeeting(meetings.at(-1).meeting_key);
+                setMettings(meetings);
+                setMeetingIndex(meetings.length-1);
             } catch (error) {
                 Alert.alert('Error',error.message,[
                             { text: 'Cancel', style: 'cancel' },
@@ -47,6 +52,12 @@ const TeamScreen = () => {
         };
         fetchMeetingData();
     }, [reloadTrigger]);
+
+    useEffect(() => {
+        if(meetings.length>0){
+            setMeeting(meetings[meetingIndex].meeting_key);
+        }
+    }, [meetingIndex]);
 
     useEffect(() => {
         if (userDrivers[0]?.info || !meeting) {
@@ -183,6 +194,10 @@ const TeamScreen = () => {
                     <Text style={styles.totalPoints}>{userPoints.toFixed(1)}</Text>
                 </View>
             </View>
+            <View style={styles.labelRow}>
+                <Text style={styles.driversLabel}>Drivers</Text>
+                {meetings.length>0 && <MeetingCarousel meetings={meetings} meetingIndex={meetingIndex} setMeetingIndex={setMeetingIndex}/>}
+            </View>
             {  !userDrivers.length>0 ?
                 <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
                 :
@@ -283,6 +298,19 @@ const styles = StyleSheet.create({
     },
     loading: {
         marginTop: 20,
+    },
+    labelRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: 10,
+        marginRight: 10,
+    },
+    driversLabel: {
+        fontSize: 14,
+        // fontWeight: 'bold',
+        color: '#fff',
+        marginLeft: 10,
     }
 });
  

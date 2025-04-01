@@ -9,15 +9,15 @@ export const fetchSession = async (name, meeting_key) => {
     return jsonContent.at(0).session_key;
 }
 
-export const fetchMeeting = async () => {
-    console.log("Fetching Meeting");
-    const response = await fetch('https://api.openf1.org/v1/meetings?meeting_key=latest');
+export const fetch2025Meetings = async () => {
+    console.log("Fetching 2025 Meetings");
+    const response = await fetch('https://api.openf1.org/v1/meetings?year=2025');
     if(!response.ok){
         console.log(response)
-        throw new Error('Failed to fetch meeting data');
+        throw new Error('Failed to fetch meetings data');
     }
     const jsonContent = await response.json();
-    return jsonContent.at(0).meeting_key;
+    return jsonContent;
 }
 
 export const fetchPosition = async (session_key, driver_number) => {
