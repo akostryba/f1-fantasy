@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import raceScoring from '@/scoring/raceScoring.json';
@@ -10,6 +10,8 @@ import { useApp } from '@/context/AppContext.jsx';
 import DriverDetails from '@/components/driverDetails.jsx';
 import {calculatePitScore } from '@/utils/calculatePitScore';
 import MeetingCarousel from '@/components/meetingCarousel.jsx';
+import teamPrincipals from '@/static/teamPrincipals.json';
+import TPContainer from '@/components/tpContainer.jsx';
 
 const TeamScreen = () => {
 
@@ -18,7 +20,7 @@ const TeamScreen = () => {
     const [meetings, setMettings] = useState([]);
     const [raceSession, setRaceSession] = useState(null);
     const [qualiSession, setQualiSession] = useState(null);
-    const { drivers, setDrivers, userDriverNums } = useApp();
+    const { drivers, setDrivers, userDriverNums, teamPrincipal } = useApp();
     const [loadingDrivers, setLoadingDrivers] = useState(true);
     const [loadingSession, setLoadingSession] = useState(true);
     const [loadingPositions, setLoadingPositions] = useState(true);
@@ -96,7 +98,6 @@ const TeamScreen = () => {
                 ]);
                 const pitStops = await fetchAllPits(race);
                 const sortedByPitDuration = pitStops.sort((a, b) => a.pit_duration - b.pit_duration);
-                console.log(sortedByPitDuration);
                 setPitStops(sortedByPitDuration);
                 setRaceSession(race);
                 setQualiSession(quali);
@@ -152,7 +153,6 @@ const TeamScreen = () => {
                         { ...prev[0], racePosition: dr1Pos, qualiPosition: dr1QualiPos, pits: dr1Pits },
                         { ...prev[1], racePosition: dr2Pos, qualiPosition: dr2QualiPos, pits: dr2Pits }
                     ];
-                    console.log(calculatePitScore(dr1Pits), calculatePitScore(dr2Pits));
                     
                     const driverOnePoints = calculateScore(newDrivers[0]) + calculatePitScore(dr1Pits);;
                     const driverTwoPoints = calculateScore(newDrivers[1]) + calculatePitScore(dr2Pits);;
@@ -207,45 +207,59 @@ const TeamScreen = () => {
                 </TouchableOpacity>
                 <Text style={styles.navText}>League</Text>
             </View>
-            <View style={styles.profilesContainer}>
-                <View style={styles.profileLeft}>
-                    <Image source={placeholderProfile} style={[styles.profilePicture]} />
-                    <Text style={{color: '#fff'}}>User 1</Text>
-                    <Text style={styles.totalPoints}>{userPoints.toFixed(1)}</Text>
+            <ScrollView>
+                <View style={styles.profilesContainer}>
+                    <View style={styles.profileLeft}>
+                        <Image source={placeholderProfile} style={[styles.profilePicture]} />
+                        <Text style={{color: '#fff'}}>User 1</Text>
+                        <Text style={styles.totalPoints}>{userPoints.toFixed(1)}</Text>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.labelRow}>
-                <Text style={styles.driversLabel}>Drivers</Text>
-                {meetings.length>0 && <MeetingCarousel meetings={meetings} meetingIndex={meetingIndex} setMeetingIndex={setMeetingIndex}/>}
-            </View>
-            {  !userDrivers.length>0 ?
-                <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
-                :
-                <View style={styles.listsContainer}>
-                    <FlatList 
-                        data={userDrivers}
-                        keyExtractor={(item) => item.info.driver_number}
-                        style={styles.leftList}
-                        renderItem={({item}) => (
-                            <TouchableOpacity onPress ={() => handleDriverSelect(item)}>
-                                <DriverContainer item={item} />
-                            </TouchableOpacity>
-                        )}
-                    />
+                <View style={styles.labelRow}>
+                    <Text style={styles.driversLabel}>Drivers</Text>
+                    {meetings.length>0 && <MeetingCarousel meetings={meetings} meetingIndex={meetingIndex} setMeetingIndex={setMeetingIndex}/>}
                 </View>
-            }
+                {  !userDrivers.length>0 ?
+                    <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
+                    :
+                    <View style={styles.listsContainer}>
+                        {/* <FlatList 
+                            data={userDrivers}
+                            keyExtractor={(item) => item.info.driver_number}
+                            style={styles.item}
+                            renderItem={({item}) => (
+                                <TouchableOpacity onPress ={() => handleDriverSelect(item)}>
+                                    <DriverContainer item={item} />
+                                </TouchableOpacity>
+                            )}
+                        /> */}
+                        {userDrivers.map((driver, index) => (
+                        <TouchableOpacity key={index} onPress={() => handleDriverSelect(driver)}>
+                            <DriverContainer item={driver}/>
+                        </TouchableOpacity>
+                    ))
+                        }
+                    </View>
+                }
+                <View style={styles.tpSection}>
+                    <Text style={styles.tpLabel}>Team Principal</Text>
+                    <TPContainer item={teamPrincipal}/>
+                </View>
 
-        <Modal
-            visible={!!selectedDriver}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setSelectedDriver(null)}
-        >
-            <TouchableOpacity style={modalStyles.backdrop} activeOpacity={1} onPress={() => setSelectedDriver(null)}>
-                <DriverDetails selectedDriver={selectedDriver} setSelectedDriver={setSelectedDriver} pitStops={pitStops}/>
-            </TouchableOpacity>
-        </Modal>
 
+
+            <Modal
+                visible={!!selectedDriver}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setSelectedDriver(null)}
+            >
+                <View style={modalStyles.backdrop}>
+                    <DriverDetails selectedDriver={selectedDriver} setSelectedDriver={setSelectedDriver} pitStops={pitStops}/>
+                </View>
+            </Modal>
+
+            </ScrollView>
         </View>
     );
 }
@@ -297,12 +311,10 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     listsContainer: {
-        flexDirection: 'row',
+        flexDirection: 'col',
         justifyContent: 'space-evenly',
-    },
-    leftList: {
-        width: '50%',
-        padding: 10
+        paddingHorizontal: 10,
+        paddingTop: 5,
     },
     rightList: {
         width: '50%',
@@ -330,6 +342,13 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#fff',
         marginLeft: 10,
+    },
+    tpSection: {
+        paddingHorizontal: 10,
+    },
+    tpLabel: {
+        color: '#fff',
+        paddingBottom: 5,
     }
 });
  

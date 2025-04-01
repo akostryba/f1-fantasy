@@ -26,7 +26,6 @@ const DriversScreen = () => {
         router.replace('/team', { animation: 'none' });
     }
     
-
     return (
         <View style={styles.container}>
             <View style={styles.navBar}>

@@ -5,12 +5,16 @@ import raceScoring from '@/scoring/raceScoring.json';
 import {singlePitScore} from '@/utils/singlePitScore';
 
 
-const ScoreDetail = ({selectedDriver, scoringFormat}) => {
+const ScoreDetail = ({selectedDriver, scoringFormat, sessionType}) => {
+    let data = selectedDriver.qualiPosition;
+    if (sessionType === "race"){
+        data = selectedDriver.racePosition;
+    }
     return ( 
         <View style={modalStyles.qualiDetail}>
             <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />
-            <Text style={modalStyles.posText}>P{selectedDriver.qualiPosition.position}</Text>
-            <Text style={modalStyles.pointText}>{scoringFormat[selectedDriver.qualiPosition.position]} PTS</Text>
+            <Text style={modalStyles.posText}>P{data.position}</Text>
+            <Text style={modalStyles.pointText}>{scoringFormat[data.position]} PTS</Text>
         </View>
      );
 };
@@ -38,14 +42,14 @@ const DriverDetails = ({selectedDriver, setSelectedDriver, pitStops}) => {
                     </View>
                     <View style={modalStyles.mainSection}>
                         <Text style={modalStyles.header}>Qualifying</Text>
-                        <ScoreDetail selectedDriver={selectedDriver} scoringFormat={qualiScoring} />
+                        <ScoreDetail selectedDriver={selectedDriver} scoringFormat={qualiScoring} sessionType={"quali"}/>
 
                         <Text style={modalStyles.header}>Race</Text>
-                        <ScoreDetail selectedDriver={selectedDriver} scoringFormat={raceScoring} />
+                        <ScoreDetail selectedDriver={selectedDriver} scoringFormat={raceScoring} sessionType={"race"}/>
                         <Text style={modalStyles.header}>Pit Stops</Text>
                             <FlatList 
                                 data={selectedDriver.pits}
-                                keyExtractor={(item) => item.driver_number + item.lap_number}
+                                keyExtractor={(item) => pitStops[item].driver_number + pitStops[item].lap_number}
                                 renderItem={({item}) => (
                                     <View style={modalStyles.qualiDetail}>
                                         <Image source={{uri: selectedDriver.info.headshot_url}} style={[modalStyles.smallHeadshot]} />

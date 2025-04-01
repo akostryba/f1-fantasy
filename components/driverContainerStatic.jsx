@@ -24,8 +24,8 @@ const DriverContainerStatic = ({item, displayArrow}) => {
 
 const styles = StyleSheet.create({
     headshot: {
-        width: 95,
-        height: 95,
+        width: 85,
+        height: 80,
         
     },
     driverContainer: {
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     driverImage: {
-        width: '30%',
+        width: '28%',
         alignItems: 'center',
         paddingTop: '5',
         borderBottomWidth: 1,
@@ -51,15 +51,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     driverFirstName: {
-        fontSize: 18,
+        fontSize: 15,
         fontWeight: 'bold',
         color: 'lightgrey',
     },
     driverLastName: {
-        fontSize: 35,
+        fontSize: 32,
         fontWeight: 'bold',
         color: '#fff',
         marginRight: 5,
+        lineHeight: 35,
     },
     driverPoints: {
         marginTop: 5,
