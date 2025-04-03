@@ -1,8 +1,12 @@
 import {View, Image, Text, ActivityIndicator} from 'react-native';
 import { StyleSheet } from 'react-native';
+import raceScoring from '@/scoring/raceScoring.json';
+import { Ionicons } from '@expo/vector-icons';
 import images from '@/static/tpImagePaths';
 
-const TPContainer = ({item, points}) => {
+const TPContainerStatic = ({item, displayArrow}) => {
+    const firstName = item?.principal?.split(' ')[0] || "error";
+    const lastName = item?.principal?.split(' ')[1] || "error";
     return ( 
         item  &&
         <View style={styles.driverContainer}>
@@ -10,51 +14,56 @@ const TPContainer = ({item, points}) => {
                 <Image source={images[item.key]} style={[styles.headshot]} />
             </View>
             <View style={styles.details}>
-                <Text style={styles.driverName}>{item.principal || "error"}</Text>
+                <Text style={styles.driverFirstName}>{firstName || "error"}</Text>
+                <Text style={styles.driverLastName}>{lastName.toUpperCase() || "error"}</Text>
                 <Text style={styles.driverDetails}>{item.team}</Text>
-                {!true ? 
-                    <ActivityIndicator style={styles.loading} size='small' color='#fff'/>
-                    :
-                    <>
-                    <Text style={styles.driverPoints}>{points}</Text>
-                    <Text style={styles.pointLabel}>PTS</Text>
-                    </>
-                }
             </View>
+            {displayArrow && <View style={styles.iconContainer}>
+                <Ionicons name="chevron-forward" size={24} color="#fff" />
+            </View>}
         </View>
      );
 }
 
 const styles = StyleSheet.create({
     headshot: {
-        width: 75,
-        height: 75,
+        width: 85,
+        height: 80,
+        
     },
     driverContainer: {
-        flexDirection: 'column',
-        alignItems: 'center',
+        flexDirection: 'row',
         borderWidth: 1,
         borderRadius: 10,
         borderColor: '#fff',
         width: '100%',
-        marginBottom: 10,
         overflow: 'hidden',
     },
     driverImage: {
-        width: '100%',
+        width: '28%',
         alignItems: 'center',
         paddingTop: '5',
         borderBottomWidth: 1,
+        borderRightWidth: 1, 
         borderColor: '#fff',
+        overflow: 'hidden',
     },
     details: {
-        paddingTop: 5,
+        paddingTop: 2,
+        paddingLeft: 10,
+        justifyContent: 'center',
     },
-    driverName: {
-        fontSize: 18,
+    driverFirstName: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: 'lightgrey',
+    },
+    driverLastName: {
+        fontSize: 32,
         fontWeight: 'bold',
         color: '#fff',
-        textAlign: 'center',
+        marginRight: 5,
+        lineHeight: 35,
     },
     driverPoints: {
         marginTop: 5,
@@ -66,18 +75,15 @@ const styles = StyleSheet.create({
     driverDetails: {
         color: '#fff',
         fontSize: '12',
-        textAlign: 'center',
-    },
-    pointLabel: {
-        color: 'lightgrey',
-        fontSize: '10',
-        fontWeight: "bold",
-        textAlign: 'center',
-        marginBottom: 10,
     },
     loading: {
         marginVertical: 10,
+    },
+    iconContainer: {
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+        marginLeft: 'auto',
     }
 });
  
-export default TPContainer;
+export default TPContainerStatic;

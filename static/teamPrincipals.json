@@ -8,35 +8,35 @@
         },
     "mercedes":
         {
-            "team": "Mercedes-AMG Petronas",
+            "team": "Mercedes",
             "principal": "Toto Wolff",
             "key": "mercedes",
             "color": "#27F4D2"
         },
     "ferrari":
         {
-            "team": "Scuderia Ferrari",
+            "team": "Ferrari",
             "principal": "Fred Vasseur",
             "key": "ferrari",
             "color": "#E80020"
         },
     "mclaren":
         {
-            "team": "McLaren F1 Team",
+            "team": "McLaren",
             "principal": "Andrea Stella",
             "key": "mclaren",
             "color": "#FF8000"
         },
     "alpine":
         {
-            "team": "Alpine F1 Team",
+            "team": "Alpine",
             "principal": "Oliver Oakes",
             "key": "alpine",
             "color": "#0093CC"
         },
     "astonmartin":
         {
-            "team": "Aston Martin Cognizant F1 Team",
+            "team": "Aston Martin",
             "principal": "Andy Cowell",
             "key": "aston",
             "color": "#229971"
@@ -44,7 +44,7 @@
     "haas":
         {
             "team": "Haas F1 Team",
-            "principal": "Guenther Steiner",
+            "principal": "Ayao Komatsu",
             "key": "haas",
             "color" : "#B6BABD"
         },
@@ -64,7 +64,7 @@
         },
     "williams":
         {
-            "team": "Williams Racing",
+            "team": "Williams",
             "principal": "James Vowles",
             "key": "williams",
             "color": "#64C4FF"

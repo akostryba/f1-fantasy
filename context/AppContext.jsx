@@ -10,7 +10,7 @@ export const AppProvider = ({ children }) => {
 
 
   return (
-    <AppContext.Provider value={{ drivers, setDrivers, userDriverNums, setUserDriverNums, teamPrincipal}}>
+    <AppContext.Provider value={{ drivers, setDrivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal}}>
       {children}
     </AppContext.Provider>
   );

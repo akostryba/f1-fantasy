@@ -5,13 +5,14 @@ import raceScoring from '@/scoring/raceScoring.json';
 import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
-import {fetchPosition, fetchSession, fetchDrivers, fetchMeeting, fetch2025Meetings, fetchPits, fetchAllPits} from '@/api/OpenF1.js';
+import {fetchPosition, fetchSession, fetchDrivers, fetch2025Meetings, fetchAllPits} from '@/api/OpenF1.js';
 import { useApp } from '@/context/AppContext.jsx';
 import DriverDetails from '@/components/driverDetails.jsx';
 import {calculatePitScore } from '@/utils/calculatePitScore';
 import MeetingCarousel from '@/components/meetingCarousel.jsx';
 import teamPrincipals from '@/static/teamPrincipals.json';
 import TPContainer from '@/components/tpContainer.jsx';
+import TPDetails from '@/components/tpDetails.jsx';
 
 const TeamScreen = () => {
 
@@ -28,6 +29,11 @@ const TeamScreen = () => {
     const [reloadTrigger, setReloadTrigger] = useState(0); 
     const [meetingIndex, setMeetingIndex] = useState(0);
     const [pitStops, setPitStops] = useState([]);
+    const [tpPoints, setTPPoints] = useState(null);
+    const [ tpDrivers, setTPDrivers ] = useState([]);
+    const [tpDriver1Score, setTPDriver1Score] = useState(0);
+    const [tpDriver2Score, setTPDriver2Score] = useState(0);
+    const [showTPDetails, setShowTPDetails] = useState(false);
 
     const router = useRouter();
 
@@ -129,11 +135,6 @@ const TeamScreen = () => {
                     fetchPosition(qualiSession, userDriverNums[1])
                 ]);
 
-                // const [dr1Pits, dr2Pits] = await Promise.all([
-                //     fetchPits(raceSession, userDriverNums[0]),
-                //     fetchPits(raceSession, userDriverNums[1]),
-                // ]);
-
                 const dr1Pits = pitStops.reduce((indices, pit, index) => {
                     if (pit.driver_number === userDriverNums[0]) {
                         indices.push(index);
@@ -157,7 +158,6 @@ const TeamScreen = () => {
                     const driverOnePoints = calculateScore(newDrivers[0]) + calculatePitScore(dr1Pits);;
                     const driverTwoPoints = calculateScore(newDrivers[1]) + calculatePitScore(dr2Pits);;
                     
-                    setUserPoints(driverOnePoints + driverTwoPoints);
                     
                     return [
                         { ...newDrivers[0], score: driverOnePoints},
@@ -178,6 +178,66 @@ const TeamScreen = () => {
 
         fetchAndCalculatePositions();
     }, [raceSession, qualiSession, pitStops]);
+
+    useEffect(() => {
+
+        const calculateTPScore = async () => {
+            const teamDrivers = Object.keys(drivers).filter(driver =>
+                drivers[driver].team_name === teamPrincipal.team
+            );
+
+            setTPDrivers(teamDrivers);
+
+            let totalTPPoints = 0;
+            try {
+                const [dr1Pos, dr2Pos, dr1QualiPos, dr2QualiPos] = await Promise.all([
+                    fetchPosition(raceSession, teamDrivers[0]),
+                    fetchPosition(raceSession, teamDrivers[1]),
+                    fetchPosition(qualiSession, teamDrivers[0]),
+                    fetchPosition(qualiSession, teamDrivers[1])
+                ]);
+
+                const dr1Pits = pitStops.reduce((indices, pit, index) => {
+                    if (pit.driver_number === Number(teamDrivers[0])) {
+                        indices.push(index);
+                    }
+                    return indices;
+                }, []);
+
+                const dr2Pits = pitStops.reduce((indices, pit, index) => {
+                    if (pit.driver_number === Number(teamDrivers[1])) {
+                        indices.push(index);
+                    }
+                    return indices;
+                }, []);
+
+                const dr1Score = Number(qualiScoring[dr1QualiPos.position]) + Number(raceScoring[dr1Pos.position]) + calculatePitScore(dr1Pits);
+                const dr2Score = Number(qualiScoring[dr2QualiPos.position]) + Number(raceScoring[dr2Pos.position]) + calculatePitScore(dr2Pits);
+                setTPDriver1Score(dr1Score);
+                setTPDriver2Score(dr2Score);
+                totalTPPoints = dr1Score + dr2Score;
+                setTPPoints(totalTPPoints/2);
+            } catch (error) {
+                Alert.alert('Error',error.message,[
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Retry', onPress: handleReload }
+                    ]
+                );
+                console.error(error);
+            }
+        };
+
+        if (!raceSession || !qualiSession || !pitStops) return;
+
+        calculateTPScore();
+        
+    }, [raceSession, qualiSession, pitStops]);
+
+    useEffect(() => {
+        if(!userDrivers[0] || !userDrivers[0].score) return;
+        const totalPoints = userDrivers[0].score + userDrivers[1].score + (tpPoints ? tpPoints : 0);
+        setUserPoints(totalPoints);
+    }, [userDrivers, tpPoints]);
 
     const calculateScore = (driver) => {
 
@@ -243,7 +303,9 @@ const TeamScreen = () => {
                 }
                 <View style={styles.tpSection}>
                     <Text style={styles.tpLabel}>Team Principal</Text>
-                    <TPContainer item={teamPrincipal}/>
+                    <TouchableOpacity  onPress={() => setShowTPDetails(true)}>
+                        <TPContainer item={teamPrincipal} points={tpPoints}/>
+                    </TouchableOpacity>
                 </View>
 
 
@@ -256,6 +318,17 @@ const TeamScreen = () => {
             >
                 <View style={modalStyles.backdrop}>
                     <DriverDetails selectedDriver={selectedDriver} setSelectedDriver={setSelectedDriver} pitStops={pitStops}/>
+                </View>
+            </Modal>
+
+            <Modal
+                visible={showTPDetails}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowTPDetails(false)}
+            >
+                <View style={modalStyles.backdrop}>
+                    <TPDetails drivers={drivers} teamPrincipal={teamPrincipal} driver1={tpDrivers[0]} driver2={tpDrivers[1]} driver1Score={tpDriver1Score} driver2Score={tpDriver2Score} setShowTPDetails={setShowTPDetails}/>
                 </View>
             </Modal>
 
@@ -342,6 +415,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#fff',
         marginLeft: 10,
+        fontWeight: 'bold',
     },
     tpSection: {
         paddingHorizontal: 10,
@@ -349,6 +423,8 @@ const styles = StyleSheet.create({
     tpLabel: {
         color: '#fff',
         paddingBottom: 5,
+        fontWeight: 'bold',
+        fontSize: 14,
     }
 });
  

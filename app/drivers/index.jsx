@@ -2,18 +2,23 @@ import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useApp } from '@/context/AppContext.jsx';
 import DriverContainerStatic from '@/components/driverContainerStatic.jsx';
+import TPContainerStatic from '@/components/tpContainerStatic';
 import Popover from 'react-native-popover-view';
 import {Dimensions} from 'react-native';
+import teamPrincipals from '@/static/teamPrincipals.json';
 
 const DriversScreen = () => {
 
     const router = useRouter();
-    const { drivers, userDriverNums, setUserDriverNums } = useApp();
+    const { drivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal } = useApp();
     const filteredDrivers = {...drivers};
     delete filteredDrivers[userDriverNums[0]];
     delete filteredDrivers[userDriverNums[1]];
     const userDriver1 = drivers[userDriverNums[0]];
     const userDriver2 = drivers[userDriverNums[1]];
+
+    const filteredTPs = {...teamPrincipals};
+    delete filteredTPs[teamPrincipal.key];
 
     const deviceWidth = Dimensions.get('window').width;
 
@@ -23,6 +28,11 @@ const DriversScreen = () => {
             newDriverNums[currentDriverIndex] = newDriverNum;
             return newDriverNums;
         });
+        router.replace('/team', { animation: 'none' });
+    }
+
+    const swapTP = (newTP) => {
+        setTeamPrincipal(newTP);
         router.replace('/team', { animation: 'none' });
     }
     
@@ -38,33 +48,59 @@ const DriversScreen = () => {
             </View>
             <Text style={[styles.label]}>Available Drivers</Text>
             <FlatList 
-                        data={Object.values(filteredDrivers)}
-                        keyExtractor={(item) => item.driver_number}
-                        style={styles.leftList}
-                        renderItem={({item}) => (
-                            <Popover
-                                popoverStyle={{width: deviceWidth - 20}}
-                                from={(
-                                <TouchableOpacity style={styles.driverOption}>
-                                    <DriverContainerStatic item={item} displayArrow={true}/>
-                                </TouchableOpacity>
-                                )}>
-                                <View style={styles.popoverView}>
-                                    <Text style={styles.popoverLabel}>Swap Driver:</Text>
-                                    <View style={styles.selectedDriver}>
-                                        <DriverContainerStatic item={item}/>
-                                    </View>
-                                    <Text style={styles.popoverLabel}>For...</Text>
-                                    <TouchableOpacity style={styles.driverOption} onPress={() => {swapDriver(0, item.driver_number)}}>
-                                        <DriverContainerStatic item={userDriver1}/>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.driverOption} onPress={() => {swapDriver(1, item.driver_number)}}>
-                                        <DriverContainerStatic item={userDriver2}/>
-                                    </TouchableOpacity>
-                                </View>
-                            </Popover>
-                        )}
-                    />
+                data={Object.values(filteredDrivers)}
+                keyExtractor={(item) => item.driver_number}
+                style={styles.list}
+                renderItem={({item}) => (
+                    <Popover
+                        popoverStyle={{width: deviceWidth - 20}}
+                        from={(
+                        <TouchableOpacity style={styles.driverOption}>
+                            <DriverContainerStatic item={item} displayArrow={true}/>
+                        </TouchableOpacity>
+                        )}>
+                        <View style={styles.popoverView}>
+                            <Text style={styles.popoverLabel}>Swap Driver:</Text>
+                            <View style={styles.selectedDriver}>
+                                <DriverContainerStatic item={item}/>
+                            </View>
+                            <Text style={styles.popoverLabel}>For...</Text>
+                            <TouchableOpacity style={styles.driverOption} onPress={() => {swapDriver(0, item.driver_number)}}>
+                                <DriverContainerStatic item={userDriver1}/>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.driverOption} onPress={() => {swapDriver(1, item.driver_number)}}>
+                                <DriverContainerStatic item={userDriver2}/>
+                            </TouchableOpacity>
+                        </View>
+                    </Popover>
+                )}
+            />
+            <Text style={[styles.label]}>Available Team Principals</Text>
+            <FlatList 
+                data={Object.values(filteredTPs)}
+                keyExtractor={(item) => item.key}
+                style={styles.list}
+                renderItem={({item}) => (
+                    <Popover
+                        popoverStyle={{width: deviceWidth - 20}}
+                        from={(
+                        <TouchableOpacity style={styles.driverOption}>
+                            <TPContainerStatic item={item} displayArrow={true}/>
+                        </TouchableOpacity>
+                        )}>
+                        <View style={styles.popoverView}>
+                            <Text style={styles.popoverLabel}>Swap Team Principal:</Text>
+                            <View style={styles.selectedDriver}>
+                                <TPContainerStatic item={item}/>
+                            </View>
+                            <Text style={styles.popoverLabel}>For...</Text>
+                            <TouchableOpacity style={styles.driverOption} onPress={() => {swapTP(item)}}>
+                                <TPContainerStatic item={teamPrincipal}/>
+                            </TouchableOpacity>
+                        </View>
+                    </Popover>
+                )}
+            />
         </View>
       );
 }
@@ -97,7 +133,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginVertical: 5,
-        paddingLeft: 5,
+        paddingLeft: 20,
     },
     popoverView:{
         width: '100%',
@@ -121,7 +157,16 @@ const styles = StyleSheet.create({
     },
     driverOption: {
         marginBottom: 10,
-    }
+    },
+    list: {
+        paddingHorizontal: 20,
+        marginHorizontal: 10,
+        marginBottom: 20,
+        borderWidth: 2,
+        borderColor: 'darkgrey',
+        borderRadius: 10,
+        padding: 10,
+    },
 });
  
 export default DriversScreen;
