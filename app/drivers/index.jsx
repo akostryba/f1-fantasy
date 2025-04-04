@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { useApp } from '@/context/AppContext.jsx';
+import { useApp } from '@/context/AppContext.js';
 import DriverContainerStatic from '@/components/driverContainerStatic.jsx';
 import TPContainerStatic from '@/components/tpContainerStatic';
 import Popover from 'react-native-popover-view';

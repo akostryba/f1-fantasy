@@ -12,7 +12,7 @@ const DriverContainer = ({item}) => {
             <View style={styles.details}>
                 <Text style={styles.driverName}>{item.info.broadcast_name || "error"}</Text>
                 <Text style={styles.driverDetails}>#{item.info.driver_number} | {item.info.team_name}</Text>
-                {!item.racePosition ? 
+                {item.racePosition === undefined ? 
                     <ActivityIndicator style={styles.loading} size='small' color='#fff'/>
                     :
                     <>

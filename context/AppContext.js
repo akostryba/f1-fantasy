@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import teamPrincipals from '@/static/teamPrincipals.json';
+import { AuthProvider } from './AuthContext';
 
 const AppContext = createContext();
 
@@ -11,7 +12,9 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{ drivers, setDrivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal}}>
-      {children}
+      <AuthProvider>
+        {children}
+      </AuthProvider>
     </AppContext.Provider>
   );
 };

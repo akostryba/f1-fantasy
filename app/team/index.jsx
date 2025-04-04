@@ -6,11 +6,10 @@ import qualiScoring from '@/scoring/qualiScoring.json';
 import placeholderProfile from '@/assets/images/profile.avif';
 import DriverContainer from '@/components/driverContainer.jsx';
 import {fetchPosition, fetchSession, fetchDrivers, fetch2025Meetings, fetchAllPits} from '@/api/OpenF1.js';
-import { useApp } from '@/context/AppContext.jsx';
+import { useApp } from '@/context/AppContext.js';
 import DriverDetails from '@/components/driverDetails.jsx';
 import {calculatePitScore } from '@/utils/calculatePitScore';
 import MeetingCarousel from '@/components/meetingCarousel.jsx';
-import teamPrincipals from '@/static/teamPrincipals.json';
 import TPContainer from '@/components/tpContainer.jsx';
 import TPDetails from '@/components/tpDetails.jsx';
 
@@ -51,11 +50,12 @@ const TeamScreen = () => {
                 setMettings(meetings);
                 setMeetingIndex(meetings.length-1);
             } catch (error) {
-                Alert.alert('Error',error.message,[
-                            { text: 'Cancel', style: 'cancel' },
-                            { text: 'Retry', onPress: handleReload }
-                            ]
-                );
+                // Alert.alert('Error',error.message,[
+                //             { text: 'Cancel', style: 'cancel' },
+                //             { text: 'Retry', onPress: handleReload }
+                //             ]
+                // );
+                fetchMeetingData();
                 console.error(error);
             }
         };
@@ -79,11 +79,12 @@ const TeamScreen = () => {
                 setDrivers(fetchedDrivers);
                 setUserDrivers([{"info": fetchedDrivers[userDriverNums[0]]}, {"info":fetchedDrivers[userDriverNums[1]]}]);
             } catch (error) {
-                Alert.alert('Error',error.message,[
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Retry', onPress: handleReload }
-                    ]
-                );
+                // Alert.alert('Error',error.message,[
+                //     { text: 'Cancel', style: 'cancel' },
+                //     { text: 'Retry', onPress: handleReload }
+                //     ]
+                // );
+                getDrivers();
                 console.error(error);
             }
             setLoadingDrivers(false);
@@ -102,17 +103,18 @@ const TeamScreen = () => {
                     fetchSession('Race', meeting),
                     fetchSession('Qualifying', meeting)
                 ]);
-                const pitStops = await fetchAllPits(race);
+                const pitStops = race ? await fetchAllPits(race) : [];
                 const sortedByPitDuration = pitStops.sort((a, b) => a.pit_duration - b.pit_duration);
                 setPitStops(sortedByPitDuration);
                 setRaceSession(race);
                 setQualiSession(quali);
             } catch (error) {
-                Alert.alert('Error',error.message,[
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Retry', onPress: handleReload }
-                    ]
-                );
+                // Alert.alert('Error',error.message,[
+                //     { text: 'Cancel', style: 'cancel' },
+                //     { text: 'Retry', onPress: handleReload }
+                //     ]
+                // );
+                getSessions();
                 console.error(error);
             } finally {
                 setLoadingSession(false);
@@ -129,10 +131,10 @@ const TeamScreen = () => {
             setLoadingPositions(true);
             try {
                 const [dr1Pos, dr2Pos, dr1QualiPos, dr2QualiPos] = await Promise.all([
-                    fetchPosition(raceSession, userDriverNums[0]),
-                    fetchPosition(raceSession, userDriverNums[1]),
-                    fetchPosition(qualiSession, userDriverNums[0]),
-                    fetchPosition(qualiSession, userDriverNums[1])
+                    raceSession!=="error" ? fetchPosition(raceSession, userDriverNums[0]) : 0,
+                    raceSession!=="error" ? fetchPosition(raceSession, userDriverNums[1]) : 0,
+                    qualiSession!=="error" ? fetchPosition(qualiSession, userDriverNums[0]) : 0,
+                    qualiSession!=="error" ? fetchPosition(qualiSession, userDriverNums[1]) : 0
                 ]);
 
                 const dr1Pits = pitStops.reduce((indices, pit, index) => {
@@ -155,9 +157,8 @@ const TeamScreen = () => {
                         { ...prev[1], racePosition: dr2Pos, qualiPosition: dr2QualiPos, pits: dr2Pits }
                     ];
                     
-                    const driverOnePoints = calculateScore(newDrivers[0]) + calculatePitScore(dr1Pits);;
-                    const driverTwoPoints = calculateScore(newDrivers[1]) + calculatePitScore(dr2Pits);;
-                    
+                    const driverOnePoints = calculateScore(newDrivers[0]) + calculatePitScore(dr1Pits);
+                    const driverTwoPoints = calculateScore(newDrivers[1]) + calculatePitScore(dr2Pits);
                     
                     return [
                         { ...newDrivers[0], score: driverOnePoints},
@@ -165,11 +166,12 @@ const TeamScreen = () => {
                     ];
                 });
             } catch (error) {
-                Alert.alert('Error',error.message,[
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Retry', onPress: handleReload }
-                    ]
-                );
+                // Alert.alert('Error',error.message,[
+                //     { text: 'Cancel', style: 'cancel' },
+                //     { text: 'Retry', onPress: handleReload }
+                //     ]
+                // );
+                fetchAndCalculatePositions(); // Retry fetching positions if the request fails
                 console.error(error);
             } finally {
                 setLoadingPositions(false);
@@ -191,10 +193,10 @@ const TeamScreen = () => {
             let totalTPPoints = 0;
             try {
                 const [dr1Pos, dr2Pos, dr1QualiPos, dr2QualiPos] = await Promise.all([
-                    fetchPosition(raceSession, teamDrivers[0]),
-                    fetchPosition(raceSession, teamDrivers[1]),
-                    fetchPosition(qualiSession, teamDrivers[0]),
-                    fetchPosition(qualiSession, teamDrivers[1])
+                    raceSession!=="error" ? fetchPosition(raceSession, teamDrivers[0]) : 0,
+                    raceSession!=="error" ? fetchPosition(raceSession, teamDrivers[1]) : 0,
+                    qualiSession!=="error" ? fetchPosition(qualiSession, teamDrivers[0]) : 0,
+                    qualiSession!=="error" ? fetchPosition(qualiSession, teamDrivers[1]) : 0
                 ]);
 
                 const dr1Pits = pitStops.reduce((indices, pit, index) => {
@@ -211,18 +213,19 @@ const TeamScreen = () => {
                     return indices;
                 }, []);
 
-                const dr1Score = Number(qualiScoring[dr1QualiPos.position]) + Number(raceScoring[dr1Pos.position]) + calculatePitScore(dr1Pits);
-                const dr2Score = Number(qualiScoring[dr2QualiPos.position]) + Number(raceScoring[dr2Pos.position]) + calculatePitScore(dr2Pits);
+                const dr1Score = Number(dr1QualiPos === 0 ? 0 : qualiScoring[dr1QualiPos.position]) + Number(dr1Pos === 0 ? 0 : raceScoring[dr1Pos.position]) + calculatePitScore(dr1Pits);
+                const dr2Score = Number(dr2QualiPos === 0 ? 0 : qualiScoring[dr2QualiPos.position]) + Number(dr2Pos === 0 ? 0 : raceScoring[dr2Pos.position]) + calculatePitScore(dr2Pits);
                 setTPDriver1Score(dr1Score);
                 setTPDriver2Score(dr2Score);
                 totalTPPoints = dr1Score + dr2Score;
                 setTPPoints(totalTPPoints/2);
             } catch (error) {
-                Alert.alert('Error',error.message,[
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Retry', onPress: handleReload }
-                    ]
-                );
+                // Alert.alert('Error',error.message,[
+                //     { text: 'Cancel', style: 'cancel' },
+                //     { text: 'Retry', onPress: handleReload }
+                //     ]
+                // );
+                calculateTPScore(); // Retry calculating TP score if the request fails
                 console.error(error);
             }
         };
@@ -234,7 +237,7 @@ const TeamScreen = () => {
     }, [raceSession, qualiSession, pitStops]);
 
     useEffect(() => {
-        if(!userDrivers[0] || !userDrivers[0].score) return;
+        if(!userDrivers[0] || userDrivers[0].score===undefined) return;
         const totalPoints = userDrivers[0].score + userDrivers[1].score + (tpPoints ? tpPoints : 0);
         setUserPoints(totalPoints);
     }, [userDrivers, tpPoints]);
@@ -244,8 +247,8 @@ const TeamScreen = () => {
         const quali = driver.qualiPosition;
         const race = driver.racePosition;
         let totalPoints = 0;
-        totalPoints += Number(qualiScoring[quali.position]);
-        totalPoints += Number(raceScoring[race.position]);
+        if (quali !== 0) totalPoints += Number(qualiScoring[quali.position]);
+        if (race !== 0) totalPoints += Number(raceScoring[race.position]);
         return totalPoints;
     }
 

@@ -16,7 +16,7 @@ const TPContainer = ({item, points}) => {
                     <ActivityIndicator style={styles.loading} size='small' color='#fff'/>
                     :
                     <>
-                    <Text style={styles.driverPoints}>{points}</Text>
+                    <Text style={styles.driverPoints}>{points ? points.toFixed(1) : 0}</Text>
                     <Text style={styles.pointLabel}>PTS</Text>
                     </>
                 }

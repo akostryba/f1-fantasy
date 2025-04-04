@@ -1,11 +1,21 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { useRouter } from "expo-router";
 import f1Logo from "@/assets/images/f1-logo.png";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 
 const HomeScreen = () => {
 
   const router = useRouter();
+
+  const { user, loading:authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+        router.replace('/auth');
+    }
+  }, [user, authLoading]);
 
   return (
     <View style={styles.container}>
