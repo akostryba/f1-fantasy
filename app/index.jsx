@@ -87,17 +87,6 @@ const HomeScreen = () => {
           </TouchableOpacity>
         )}
       />
-
-      <Image source={f1Logo} style={styles.image} />
-      <Text style={styles.title}>Welcome to F1 Fantasy!</Text>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push('/team')}
-      >
-        <Text style={styles.buttonText}>Start</Text>
-
-      </TouchableOpacity>
       
     </View>
   );
