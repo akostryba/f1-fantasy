@@ -6,6 +6,7 @@ import TPContainerStatic from '@/components/tpContainerStatic';
 import Popover from 'react-native-popover-view';
 import {Dimensions} from 'react-native';
 import teamPrincipals from '@/static/teamPrincipals.json';
+import rosterService from '@/services/rosterService.js';
 
 const DriversScreen = () => {
 

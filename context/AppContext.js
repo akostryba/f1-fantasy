@@ -8,10 +8,12 @@ export const AppProvider = ({ children }) => {
   const [drivers, setDrivers] = useState({});
   const [userDriverNums, setUserDriverNums] = useState([1, 4]);
   const [teamPrincipal, setTeamPrincipal] = useState(teamPrincipals["mercedes"]);
+  const [league, setLeague] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
 
   return (
-    <AppContext.Provider value={{ drivers, setDrivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal}}>
+    <AppContext.Provider value={{ drivers, setDrivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal, league, setLeague, setSelectedTeam, selectedTeam}}>
       <AuthProvider>
         {children}
       </AuthProvider>
