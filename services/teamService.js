@@ -17,7 +17,7 @@ const teamService = {
 
         try {
             const response = await databaseService.listDocuments(dbId, colId, [
-                Query.equal('user_id', userId)
+                Query.equal('owner_id', userId)
             ]);
             return response;
         } catch (error) {

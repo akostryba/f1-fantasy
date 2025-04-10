@@ -16,7 +16,9 @@ const leagueService = {
         }
 
         try {
-            const response = await databaseService.listDocuments(dbId, colId, leagueId);
+            const response = await databaseService.listDocuments(dbId, colId, [
+                Query.equal('$id', leagueId)
+            ]);
             return response;
         } catch (error) {
             console.log("Error fetching league:", error.message);

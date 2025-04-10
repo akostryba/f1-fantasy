@@ -33,7 +33,7 @@ const HomeScreen = () => {
           return;
         }
 
-        const teamsData = response;
+        const teamsData = response.data;
         const teamsWithLeagues = await Promise.all(
           teamsData.map(async (team) => {
             const leagueResponse = await leagueService.getLeague(team.league_id);
@@ -43,7 +43,7 @@ const HomeScreen = () => {
             }
             return {
               ...team,
-              league: leagueResponse,
+              league: leagueResponse.data[0],
             };
         }));
         setTeams(teamsWithLeagues);
@@ -57,8 +57,7 @@ const HomeScreen = () => {
     setLeague(leagueId);
     setSelectedTeam(teamId);
     const drivers = await rosterService.getDrivers(teamId);
-    console.log("Drivers:", drivers);
-    setUserDriverNums([drivers[0].driver_number, drivers[1].driver_number]);
+    setUserDriverNums([drivers.data[0].driver_number, drivers.data[1].driver_number]);
     router.push(`/team`)
   }
 
@@ -83,7 +82,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             style={styles.leagueContainer}
             onPress={() => selectLeague(item.league_id, item.$id)}>
-            <Text style={styles.leagueName}>{item.league[0].name}</Text>
+            <Text style={styles.leagueName}>{item.league.name}</Text>
           </TouchableOpacity>
         )}
       />
