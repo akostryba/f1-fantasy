@@ -39,6 +39,7 @@ const TeamScreen = () => {
     const [selectedDriver, setSelectedDriver] = useState(null);
 
     const handleDriverSelect = (driver) => {
+        if(driver.info === undefined) return;
         setSelectedDriver(driver);
     }
 
@@ -243,7 +244,7 @@ const TeamScreen = () => {
     }, [userDrivers, tpPoints]);
 
     const calculateScore = (driver) => {
-
+        if (driver.info===undefined) return 0;
         const quali = driver.qualiPosition;
         const race = driver.racePosition;
         let totalPoints = 0;
@@ -286,16 +287,6 @@ const TeamScreen = () => {
                     <ActivityIndicator style={styles.loading} size='large' color='#fff'/>
                     :
                     <View style={styles.listsContainer}>
-                        {/* <FlatList 
-                            data={userDrivers}
-                            keyExtractor={(item) => item.info.driver_number}
-                            style={styles.item}
-                            renderItem={({item}) => (
-                                <TouchableOpacity onPress ={() => handleDriverSelect(item)}>
-                                    <DriverContainer item={item} />
-                                </TouchableOpacity>
-                            )}
-                        /> */}
                         {userDrivers.map((driver, index) => (
                         <TouchableOpacity key={index} onPress={() => handleDriverSelect(driver)}>
                             <DriverContainer item={driver}/>

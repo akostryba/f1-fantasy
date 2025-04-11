@@ -57,7 +57,7 @@ const HomeScreen = () => {
     setLeague(leagueId);
     setSelectedTeam(teamId);
     const drivers = await rosterService.getDrivers(teamId);
-    setUserDriverNums([drivers.data[0].driver_number, drivers.data[1].driver_number]);
+    setUserDriverNums([drivers.data[0]?.driver_number || null, drivers.data[1]?.driver_number] || null);
     router.push(`/team`)
   }
 

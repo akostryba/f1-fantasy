@@ -2,10 +2,12 @@ import {View, Image, Text, ActivityIndicator} from 'react-native';
 import { StyleSheet } from 'react-native';
 import raceScoring from '@/scoring/raceScoring.json';
 import { Ionicons } from '@expo/vector-icons';
+import driverPlaceholderImg from '@/assets/images/driver-placeholder.png';
+
 
 const DriverContainerStatic = ({item, displayArrow}) => {
     return ( 
-        item  &&
+        item  ?
         <View style={styles.driverContainer}>
             <View style={[{backgroundColor: '#' + item.team_colour}, styles.driverImage]}>
                 <Image source={{uri: item.headshot_url}} style={[styles.headshot]} />
@@ -14,6 +16,19 @@ const DriverContainerStatic = ({item, displayArrow}) => {
                 <Text style={styles.driverFirstName}>{item.first_name || "error"}</Text>
                 <Text style={styles.driverLastName}>{item.last_name.toUpperCase() || "error"}</Text>
                 <Text style={styles.driverDetails}>#{item.driver_number} | {item.team_name}</Text>
+            </View>
+            {displayArrow && <View style={styles.iconContainer}>
+                <Ionicons name="chevron-forward" size={24} color="#fff" />
+            </View>}
+        </View>
+        :
+        <View style={styles.driverContainer}>
+            <View style={[{backgroundColor: 'darkgrey'}, styles.driverImage]}>
+                <Image source={driverPlaceholderImg} style={[styles.headshot]} />
+            </View>
+            <View style={styles.details}>
+                <Text style={styles.driverLastName}>Empty</Text>
+                <Text style={styles.driverDetails}>#0</Text>
             </View>
             {displayArrow && <View style={styles.iconContainer}>
                 <Ionicons name="chevron-forward" size={24} color="#fff" />

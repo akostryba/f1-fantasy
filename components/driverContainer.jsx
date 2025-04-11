@@ -1,10 +1,12 @@
 import {View, Image, Text, ActivityIndicator} from 'react-native';
 import { StyleSheet } from 'react-native';
 import raceScoring from '@/scoring/raceScoring.json';
+import driverPlaceholderImg from '@/assets/images/driver-placeholder.png';
 
 const DriverContainer = ({item}) => {
+    console.log(item);
     return ( 
-        item  &&
+        item.info  ?
         <View style={styles.driverContainer}>
             <View style={[{backgroundColor: '#' + item.info.team_colour}, styles.driverImage]}>
                 <Image source={{uri: item.info.headshot_url}} style={[styles.headshot]} />
@@ -20,6 +22,17 @@ const DriverContainer = ({item}) => {
                     <Text style={styles.pointLabel}>PTS</Text>
                     </>
                 }
+            </View>
+        </View>
+        :
+        <View style={styles.driverContainer}>
+            <View style={[{backgroundColor: 'darkgrey'}, styles.driverImage]}>
+            <Image source={driverPlaceholderImg} style={[styles.headshot]} />
+            </View>
+            <View style={styles.details}>
+                <Text style={styles.driverName}>Empty</Text>
+                <Text style={styles.driverPoints}>0</Text>
+                    <Text style={styles.pointLabel}>PTS</Text>
             </View>
         </View>
      );
