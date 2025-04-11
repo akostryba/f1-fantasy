@@ -13,6 +13,7 @@ const databaseService = {
     }, 
 
     async createDocument(dbId, colId, data, id=null) {
+        console.log(2, data);
         try {
             return await database.createDocument(dbId, colId, id || undefined, data);
         }

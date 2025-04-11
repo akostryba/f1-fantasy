@@ -78,7 +78,7 @@ const TeamScreen = () => {
             try{
                 const fetchedDrivers=  await fetchDrivers(meeting);
                 setDrivers(fetchedDrivers);
-                setUserDrivers([{"info": fetchedDrivers[userDriverNums[0]]}, {"info":fetchedDrivers[userDriverNums[1]]}]);
+                setUserDrivers([{"info": fetchedDrivers[userDriverNums[0]?.driver_number || null]}, {"info":fetchedDrivers[userDriverNums[1]?.driver_number || null]}]);
             } catch (error) {
                 // Alert.alert('Error',error.message,[
                 //     { text: 'Cancel', style: 'cancel' },
@@ -132,21 +132,21 @@ const TeamScreen = () => {
             setLoadingPositions(true);
             try {
                 const [dr1Pos, dr2Pos, dr1QualiPos, dr2QualiPos] = await Promise.all([
-                    raceSession!=="error" ? fetchPosition(raceSession, userDriverNums[0]) : 0,
-                    raceSession!=="error" ? fetchPosition(raceSession, userDriverNums[1]) : 0,
-                    qualiSession!=="error" ? fetchPosition(qualiSession, userDriverNums[0]) : 0,
-                    qualiSession!=="error" ? fetchPosition(qualiSession, userDriverNums[1]) : 0
+                    raceSession!=="error" ? fetchPosition(raceSession, userDriverNums[0].driver_number) : 0,
+                    raceSession!=="error" ? fetchPosition(raceSession, userDriverNums[1].driver_number) : 0,
+                    qualiSession!=="error" ? fetchPosition(qualiSession, userDriverNums[0].driver_number) : 0,
+                    qualiSession!=="error" ? fetchPosition(qualiSession, userDriverNums[1].driver_number) : 0
                 ]);
 
                 const dr1Pits = pitStops.reduce((indices, pit, index) => {
-                    if (pit.driver_number === userDriverNums[0]) {
+                    if (pit.driver_number === userDriverNums[0].driver_number) {
                         indices.push(index);
                     }
                     return indices;
                 }, []);
 
                 const dr2Pits = pitStops.reduce((indices, pit, index) => {
-                    if (pit.driver_number === userDriverNums[1]) {
+                    if (pit.driver_number === userDriverNums[1].driver_number) {
                         indices.push(index);
                     }
                     return indices;

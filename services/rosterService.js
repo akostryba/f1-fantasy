@@ -27,13 +27,13 @@ const rosterService = {
     },
 
     async addDriver(teamId, driverNumber) {
-
         const data = {
             team_id: teamId,
-            driver_number: driverNumber,
+            driver_number: driverNumber.toString(),
         }
+        console.log(data)
 
-        const response = await databaseService.createDocument(dbId, col, data, ID.unique());
+        const response = await databaseService.createDocument(dbId, colId, data, ID.unique());
         if(response?.error) {
             return { error: response.error };
         }
@@ -43,7 +43,7 @@ const rosterService = {
 
     async removeDriver(id) {
 
-        const response = await databaseService.deleteDocument(dbId, col, id);
+        const response = await databaseService.deleteDocument(dbId, colId, id);
         if(response?.error) {
             return { error: response.error };
         }

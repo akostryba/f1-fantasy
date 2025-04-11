@@ -11,22 +11,34 @@ import rosterService from '@/services/rosterService.js';
 const DriversScreen = () => {
 
     const router = useRouter();
-    const { drivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal } = useApp();
+    const { drivers, userDriverNums, setUserDriverNums, teamPrincipal, setTeamPrincipal, selectedTeam } = useApp();
     const filteredDrivers = {...drivers};
-    delete filteredDrivers[userDriverNums[0]];
-    delete filteredDrivers[userDriverNums[1]];
-    const userDriver1 = drivers[userDriverNums[0]];
-    const userDriver2 = drivers[userDriverNums[1]];
+    if (userDriverNums[0]){
+        delete filteredDrivers[userDriverNums[0].driver_number];
+    }
+    if (userDriverNums[1]){
+        delete filteredDrivers[userDriverNums[1].driver_number];
+    }
+    const userDriver1 = drivers[userDriverNums[0]?.driver_number] || null;
+    const userDriver2 = drivers[userDriverNums[1]?.driver_number] || null;
 
     const filteredTPs = {...teamPrincipals};
     delete filteredTPs[teamPrincipal.key];
 
     const deviceWidth = Dimensions.get('window').width;
 
-    const swapDriver = (currentDriverIndex, newDriverNum) => {
+    const swapDriver = async (currentDriverIndex, newDriverNum) => {
+        console.log(userDriverNums);
+        if (userDriverNums[currentDriverIndex]){
+            console.log('removing');
+            const responseDelete = await rosterService.removeDriver(userDriverNums[currentDriverIndex].$id);
+        }
+        console.log(selectedTeam, newDriverNum, currentDriverIndex);
+        const response = await rosterService.addDriver(selectedTeam, newDriverNum);
+        console.log(response);
         setUserDriverNums((prevDriverNums) => {
             const newDriverNums = [...prevDriverNums];
-            newDriverNums[currentDriverIndex] = newDriverNum;
+            newDriverNums[currentDriverIndex] = response.data;
             return newDriverNums;
         });
         router.replace('/team', { animation: 'none' });
