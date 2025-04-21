@@ -4,7 +4,7 @@ import raceScoring from '@/scoring/raceScoring.json';
 import driverPlaceholderImg from '@/assets/images/driver-placeholder.png';
 
 const DriverContainer = ({item}) => {
-    console.log(item);
+    // console.log(item);
     return ( 
         item.info  ?
         <View style={styles.driverContainer}>

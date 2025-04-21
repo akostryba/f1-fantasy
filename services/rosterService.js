@@ -31,7 +31,6 @@ const rosterService = {
             team_id: teamId,
             driver_number: driverNumber.toString(),
         }
-        console.log(data)
 
         const response = await databaseService.createDocument(dbId, colId, data, ID.unique());
         if(response?.error) {

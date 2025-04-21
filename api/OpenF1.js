@@ -14,7 +14,6 @@ export const fetch2025Meetings = async () => {
     console.log("Fetching 2025 Meetings");
     const response = await fetch('https://api.openf1.org/v1/meetings?year=2025');
     if(!response.ok){
-        console.log(response)
         throw new Error('Failed to fetch meetings data');
         // fetch2025Meetings();
     }
@@ -65,7 +64,6 @@ export const fetchPits = async (session_key, driver_number) => {
         throw new Error('Failed to fetch pit data');
     }
     const jsonContent = await response.json();
-
     return jsonContent;
 }
 
@@ -76,6 +74,5 @@ export const fetchAllPits = async (session_key) => {
         throw new Error('Failed to fetch pit data');
     }
     const jsonContent = await response.json();
-
     return jsonContent;
 }

@@ -33,9 +33,7 @@ const DriversScreen = () => {
             console.log('removing');
             const responseDelete = await rosterService.removeDriver(userDriverNums[currentDriverIndex].$id);
         }
-        console.log(selectedTeam, newDriverNum, currentDriverIndex);
         const response = await rosterService.addDriver(selectedTeam, newDriverNum);
-        console.log(response);
         setUserDriverNums((prevDriverNums) => {
             const newDriverNums = [...prevDriverNums];
             newDriverNums[currentDriverIndex] = response.data;

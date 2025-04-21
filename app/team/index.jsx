@@ -139,14 +139,14 @@ const TeamScreen = () => {
                 ]);
 
                 const dr1Pits = pitStops.reduce((indices, pit, index) => {
-                    if (pit.driver_number === userDriverNums[0].driver_number) {
+                    if (Number(pit.driver_number) === Number(userDriverNums[0].driver_number)) {
                         indices.push(index);
                     }
                     return indices;
                 }, []);
 
                 const dr2Pits = pitStops.reduce((indices, pit, index) => {
-                    if (pit.driver_number === userDriverNums[1].driver_number) {
+                    if (Number(pit.driver_number) === Number(userDriverNums[1].driver_number)) {
                         indices.push(index);
                     }
                     return indices;
