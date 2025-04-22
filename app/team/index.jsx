@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, Alert, ActivityIndicator, Modal, ScrollView } from 'react-native';
+import {TouchableOpacity} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import raceScoring from '@/scoring/raceScoring.json';
@@ -178,8 +179,9 @@ const TeamScreen = () => {
                 setLoadingPositions(false);
             }
         };
-
-        fetchAndCalculatePositions();
+        if(userDriverNums[0]){
+            fetchAndCalculatePositions();
+        }
     }, [raceSession, qualiSession, pitStops]);
 
     useEffect(() => {
@@ -199,7 +201,6 @@ const TeamScreen = () => {
                     qualiSession!=="error" ? fetchPosition(qualiSession, teamDrivers[0]) : 0,
                     qualiSession!=="error" ? fetchPosition(qualiSession, teamDrivers[1]) : 0
                 ]);
-
                 const dr1Pits = pitStops.reduce((indices, pit, index) => {
                     if (pit.driver_number === Number(teamDrivers[0])) {
                         indices.push(index);

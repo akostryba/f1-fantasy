@@ -20,7 +20,7 @@ switch (Platform.OS) {
         client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_BUNDLE_ID);
         break;
     case 'android':
-        client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_PACKAGE_NAME);
+        client.setPlatform(process.env.EXPO_PUBLIC_APPWRITE_PACKAGE_ID);
         break;
 }
 

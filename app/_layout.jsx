@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import {AppProvider} from '@/context/AppContext.js';
+import { View, Image, Text, StyleSheet } from 'react-native';
 
 export default function RootLayout() {
   return (
@@ -7,8 +8,20 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#FF1801",
+            backgroundColor: 'transparent',
           },
+          headerBackground: () => (
+            <View style={styles.headerBG} />
+          ),
+          headerTitle: () => (
+            <View style={styles.header}>
+              <Image
+                source={require('@/assets/images/f1-logo.png')}
+                style={styles.logo}
+              />
+              <Text style={styles.headerText}>Fantasy</Text>
+            </View>
+          ),
           headerTintColor: "#fff",
           headerTitleStyle: {
             fontWeight: "bold",
@@ -25,3 +38,29 @@ export default function RootLayout() {
     </AppProvider>
   )
 }
+
+
+const styles = StyleSheet.create({
+  headerBG: {
+    flex: 1,
+    backgroundColor: '#15151e',
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 100
+  },
+  logo: {
+    width: 80, 
+    height: 40, 
+    marginRight: 8, 
+    resizeMode: 'contain',
+  },
+  headerText: { 
+    color: '#fff', 
+    fontSize: 25, 
+    fontWeight: 'bold',
+  }
+})

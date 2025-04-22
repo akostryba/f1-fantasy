@@ -141,7 +141,7 @@ const modalStyles = StyleSheet.create({
     },
     driverDetails: {
         color: '#fff',
-        fontSize: '12',
+        fontSize: 12,
         lineHeight: '12',
         marginBottom: 5,
     },

@@ -78,12 +78,12 @@ const styles = StyleSheet.create({
     },
     driverDetails: {
         color: '#fff',
-        fontSize: '12',
+        fontSize: 12,
         textAlign: 'center',
     },
     pointLabel: {
         color: 'lightgrey',
-        fontSize: '10',
+        fontSize: 10,
         fontWeight: "bold",
         textAlign: 'center',
         marginBottom: 10,

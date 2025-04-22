@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     },
     driverDetails: {
         color: '#fff',
-        fontSize: '12',
+        fontSize: 12,
     },
     loading: {
         marginVertical: 10,

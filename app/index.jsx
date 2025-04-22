@@ -86,6 +86,13 @@ const HomeScreen = () => {
           </TouchableOpacity>
         )}
       />
+
+      <TouchableOpacity
+        style={styles.leaguesButton}
+        onPress={() => router.push('/availableLeagues')}
+      >
+        <Text style={styles.findLeagueText}>Find League</Text>
+      </TouchableOpacity>
       
     </View>
   );
@@ -94,7 +101,6 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     padding: 20,
     backgroundColor: "#15151e",
@@ -135,13 +141,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderBottomWidth: 1,
     borderColor: "#fff",
-
+    zIndex: 10,
+  },
+  addButton: {
+    zIndex: 10
   },
   addSymbol: {
     fontSize: 30,
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
+    zIndex: 10,
   },
   leagueContainer: {
     backgroundColor: "#1e1e2f",
@@ -157,7 +167,20 @@ const styles = StyleSheet.create({
   },
   leagueList: {
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 10,
+    flexGrow: 0,
+  },
+  findLeagueText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  leaguesButton: {
+    backgroundColor: "#FF1801",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
   },
 })
 
