@@ -19,10 +19,9 @@ const TeamScreen = () => {
 
     const [userDrivers, setUserDrivers] = useState([]);
     const [meeting, setMeeting] = useState(null);
-    const [meetings, setMettings] = useState([]);
     const [raceSession, setRaceSession] = useState(null);
     const [qualiSession, setQualiSession] = useState(null);
-    const { drivers, setDrivers, userDriverNums, teamPrincipal } = useApp();
+    const { drivers, setDrivers, userDriverNums, teamPrincipal, meetings } = useApp();
     const [loadingDrivers, setLoadingDrivers] = useState(true);
     const [loadingSession, setLoadingSession] = useState(true);
     const [loadingPositions, setLoadingPositions] = useState(true);
@@ -46,23 +45,16 @@ const TeamScreen = () => {
     }
 
     useEffect(() => {
-        const fetchMeetingData = async () => {
+        const setMeetingData = async () => {
             try{
-                const meetings = await fetch2025Meetings();
                 setMeeting(meetings.at(-1).meeting_key);
-                setMettings(meetings);
                 setMeetingIndex(meetings.length-1);
             } catch (error) {
-                // Alert.alert('Error',error.message,[
-                //             { text: 'Cancel', style: 'cancel' },
-                //             { text: 'Retry', onPress: handleReload }
-                //             ]
-                // );
-                fetchMeetingData();
+                setMeetingData();
                 console.error(error);
             }
         };
-        fetchMeetingData();
+        setMeetingData();
     }, [reloadTrigger]);
 
     useEffect(() => {
@@ -253,13 +245,6 @@ const TeamScreen = () => {
         if (quali !== 0) totalPoints += Number(qualiScoring[quali.position]);
         if (race !== 0) totalPoints += Number(raceScoring[race.position]);
         return totalPoints;
-    }
-
-    const handleReload = () => {
-        setReloadTrigger(prev => prev + 1);
-        setLoadingDrivers(true);
-        setLoadingSession(true);
-        setLoadingPositions(true);
     }
 
 

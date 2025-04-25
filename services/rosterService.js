@@ -4,6 +4,7 @@ import { ID, Query } from "react-native-appwrite";
 // Appwrite database and collection ID
 const dbId = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID;
 const colId = process.env.EXPO_PUBLIC_APPWRITE_COL_ROSTERS_ID;
+const teamRosterColId = process.env.EXPO_PUBLIC_APPWRITE_COL_TEAMROSTERS_ID;
 
 const rosterService = {
 
@@ -18,6 +19,26 @@ const rosterService = {
         try {
             const response = await databaseService.listDocuments(dbId, colId, [
                 Query.equal('team_id', teamId)
+            ]);
+            return response;
+        } catch (error) {
+            console.log("Error fetching drivers:", error.message);
+            return { data: [], error: error.message};
+        }
+    },
+
+    async getRoster(teamId, meetingName) {
+        if (!teamId){
+            console.error("Error: Missing teamId in getDrivers");
+            return {
+                data: [], error: "Team ID is missing"
+            }
+        }
+
+        try {
+            const response = await databaseService.listDocuments(dbId, teamRosterColId, [
+                Query.equal('team_id', teamId),
+                Query.equal('race_week', meetingName)
             ]);
             return response;
         } catch (error) {

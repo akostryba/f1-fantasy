@@ -7,12 +7,13 @@ import { useEffect, useState } from "react";
 import teamService from "@/services/teamService";
 import leagueService from "@/services/leagueService";
 import rosterService from "@/services/rosterService";
+import { fetch2025Meetings } from '@/api/OpenF1.js';
 
 
 const HomeScreen = () => {
 
   const router = useRouter();
-  const { setLeague, setSelectedTeam, setUserDriverNums } = useApp();
+  const { setLeague, setSelectedTeam, setUserDriverNums, setMeetings } = useApp();
 
   const { user, loading:authLoading } = useAuth();
   const [teams, setTeams] = useState([]);
@@ -53,11 +54,23 @@ const HomeScreen = () => {
     fetchTeams();
   },[user, authLoading]);
 
+  const fetchMeetingData = async () => {
+      try{
+          const meetings = await fetch2025Meetings();
+          setMeetings(meetings);
+          return meetings.at(-1).circuit_short_name;
+      } catch (error) {
+          fetchMeetingData();
+          console.error(error);
+      }
+  };
+
   const selectLeague = async (leagueId, teamId) => {
+    const latestMeeting = await fetchMeetingData();
     setLeague(leagueId);
     setSelectedTeam(teamId);
-    const drivers = await rosterService.getDrivers(teamId);
-    setUserDriverNums([drivers.data[0] || null, drivers.data[1] || null] || null);
+    const roster = await rosterService.getRoster(teamId, latestMeeting);
+    setUserDriverNums([{"driver_number": roster.data[0].driver1_num || null}, {"driver_number":roster.data[0].driver2_num || null}] || null);
     router.push(`/team`)
   }
 
