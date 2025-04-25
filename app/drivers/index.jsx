@@ -7,6 +7,7 @@ import Popover from 'react-native-popover-view';
 import {Dimensions} from 'react-native';
 import teamPrincipals from '@/static/teamPrincipals.json';
 import rosterService from '@/services/rosterService.js';
+import Navbar from '@/components/navbar.jsx';
 
 const DriversScreen = () => {
 
@@ -49,14 +50,7 @@ const DriversScreen = () => {
     
     return (
         <View style={styles.container}>
-            <View style={styles.navBar}>
-                <Text style={styles.navText}>Home</Text>
-                <TouchableOpacity onPress={() => router.replace('/team', { animation: 'none' })}>
-                    <Text style={styles.navText}>Team</Text>
-                </TouchableOpacity>
-                <Text style={[styles.navText, styles.underlined]}>Drivers</Text>
-                <Text style={styles.navText}>League</Text>
-            </View>
+            <Navbar selected="drivers"/>
             <Text style={[styles.label]}>Available Drivers</Text>
             <FlatList 
                 data={Object.values(filteredDrivers)}

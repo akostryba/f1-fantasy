@@ -13,6 +13,7 @@ import {calculatePitScore } from '@/utils/calculatePitScore';
 import MeetingCarousel from '@/components/meetingCarousel.jsx';
 import TPContainer from '@/components/tpContainer.jsx';
 import TPDetails from '@/components/tpDetails.jsx';
+import Navbar from '@/components/navbar.jsx';
 
 const TeamScreen = () => {
 
@@ -264,14 +265,7 @@ const TeamScreen = () => {
 
     return (  
         <View style={styles.container}>
-            <View style={styles.navBar}>
-                <Text style={styles.navText}>Home</Text>
-                <Text style={[styles.navText, styles.underlined]}>Team</Text>
-                <TouchableOpacity onPress={() => router.replace({pathname: '/drivers', params: {drivers: JSON.stringify(drivers)}}, { animation: 'none' })}>
-                    <Text style={styles.navText}>Drivers</Text>
-                </TouchableOpacity>
-                <Text style={styles.navText}>League</Text>
-            </View>
+            <Navbar selected="team"/>
             <ScrollView>
                 <View style={styles.profilesContainer}>
                     <View style={styles.profileLeft}>
@@ -344,23 +338,6 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 10,
         backgroundColor: '#15151e',
-    },
-    navBar: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-    },
-    navText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: 'lightgrey',
-    },
-    underlined: {
-        borderBottomWidth: 2,
-        borderBottomColor: '#FF1801',
-        paddingBottom: 5,
     },
     profilesContainer: {
         flexDirection: 'row',
